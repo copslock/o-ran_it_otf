@@ -1,0 +1,12 @@
+appName: otf-cert-secret-builder
+
+Secret:
+    PKCS12_CERT: temp
+    PKCS12_KEY: temp
+    PEM_CERT: temp
+    PEM_KEY: temp
+    SSH_PRIVATE_KEY: temp
+    privateKey:
+      username: id
+      passphrase: passphrase
+      key: tmp

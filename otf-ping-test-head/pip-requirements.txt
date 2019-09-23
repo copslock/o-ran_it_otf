@@ -1,0 +1,6 @@
+flask
+flask-cors
+pyping
+paramiko
+FLASK
+FLASK-CORS

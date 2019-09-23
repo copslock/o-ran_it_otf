@@ -1,0 +1,6 @@
+flask
+FLASK
+pymongo
+robotframework
+robotframework-selenium2library
+selenium

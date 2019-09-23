@@ -1,0 +1,112 @@
+#!/usr/bin/env groovy
+
+
+properties([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [ 
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PHASE', defaultValue: "BUILD"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'ENV', defaultValue: "dev"],    
+        [$class: 'hudson.model.StringParameterDefinition', name: 'MECHID', defaultValue: "id"],                  
+        [$class: 'hudson.model.StringParameterDefinition', name: 'KUBE_CONFIG', defaultValue: "kubeConfig-dev"],      
+        [$class: 'hudson.model.StringParameterDefinition', name: 'TILLER_NAMESPACE', defaultValue: "org-onap-otf"]     
+]]]) 
+
+
+echo "Build branch: ${env.BRANCH_NAME}"
+
+node("docker"){
+	stage 'Checkout'
+	checkout scm
+	PHASES=PHASE.tokenize( '_' );
+	echo "PHASES : " + PHASES
+	ARTIFACT_ID="otf-aaf-credential-generator"
+	echo "Tiller Namespace: " + TILLER_NAMESPACE
+
+	withEnv(["PATH=${env.PATH}:${tool 'jdk180'}:${env.WORKSPACE}/linux-amd64", "JAVA_HOME=${tool 'jdk180'}","HELM_HOME=${env.WORKSPACE}"]) { 
+			
+		echo "PATH=${env.PATH}"
+		echo "JAVA_HOME=${env.JAVA_HOME}"
+		echo "HELM_HOME=${env.HELM_HOME}"
+
+		wrap([$class: 'ConfigFileBuildWrapper', managedFiles: [
+			[fileId: 'maven-settings.xml', variable: 'MAVEN_SETTINGS']
+			]]) {
+
+			if (PHASES.contains("DEPLOY") || PHASES.contains("UNDEPLOY")) { 
+				stage 'Init Helm'
+
+				//check if helm exists if not install
+				if(fileExists('linux-amd64/helm')){
+					sh """
+						echo "helm is already installed"
+					"""
+				}
+				else{
+				//download helm
+					sh """
+						echo "installing helm"
+						wget  https://storage.googleapis.com/kubernetes-helm/helm-v2.8.2-linux-amd64.tar.gz
+						tar -xf helm-v2.8.2-linux-amd64.tar.gz
+						rm helm-v2.8.2-linux-amd64.tar.gz
+					"""
+				}
+
+				withCredentials([file(credentialsId: KUBE_CONFIG, variable: 'KUBECONFIG')]) {
+
+					dir('helm'){
+				    	//check if charts are valid, and then perform dry run, if successful then upgrade/install charts
+
+      					if (PHASES.contains("UNDEPLOY") ) {
+							stage 'Undeploy'
+ 
+      						sh """
+      							helm delete --tiller-namespace=$TILLER_NAMESPACE --purge $ARTIFACT_ID
+      						"""
+      					}
+
+				    	//NOTE Double quotes are used below to access groovy variables like artifact_id and tiller_namespace
+	    	          	if (PHASES.contains("DEPLOY") ){
+	    	          		stage 'Deploy'
+								withCredentials([usernamePassword(credentialsId: MECHID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+
+									//Note: KEYFILE_PATH must be within helm/$ARTIFACT_ID and must be relative path starting from that directory
+									sh """
+
+										echo "Remove old key info"
+										rm -rf keyfile;
+										rm -rf digest.txt
+										rm -rf $ARTIFACT_ID/keyfile
+
+										ls
+										echo "Create keyfile and digest"
+										java -jar ../aaf_cadi_core_2.1.10_SNAPSHOT.jar keygen keyfile
+										java -jar ../aaf_cadi_core_2.1.10_SNAPSHOT.jar digest $PASSWORD keyfile > digest.txt 2>&1
+										
+										cp keyfile $ARTIFACT_ID
+										KEYFILE_PATH=keyfile
+										DIGEST="enc:"
+										DIGEST+=\$(cat digest.txt)
+										echo \$DIGEST
+										echo "Validate Yaml"
+										helm lint $ARTIFACT_ID
+
+										echo "View Helm Templates"
+										helm template $ARTIFACT_ID --set Secret.aafId=$USERNAME --set Secret.aafPassword=\$DIGEST --set Secret.aafMechPassword=$PASSWORD --set keyfilePath=\$KEYFILE_PATH
+
+										echo "Perform Dry Run Of Install"
+										helm upgrade --tiller-namespace=$TILLER_NAMESPACE --install --dry-run $ARTIFACT_ID $ARTIFACT_ID --set Secret.aafId=$USERNAME --set Secret.aafPassword=\$DIGEST --set Secret.aafMechPassword=$PASSWORD --set keyfilePath=\$KEYFILE_PATH
+
+										echo "Helm Install/Upgrade"
+						    			helm upgrade --tiller-namespace=$TILLER_NAMESPACE --install $ARTIFACT_ID $ARTIFACT_ID --set Secret.aafId=$USERNAME --set Secret.aafPassword=\$DIGEST --set Secret.aafMechPassword=$PASSWORD --set keyfilePath=\$KEYFILE_PATH
+
+						    			rm -rf $ARTIFACT_ID/keyfile
+										rm -rf keyfile
+										rm -rf digest.txt
+									"""
+								}
+	    	          	}
+
+					}
+				}
+          	} 
+		}
+	}
+}

@@ -1,0 +1,137 @@
+#!/usr/bin/env groovy
+
+
+properties([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PHASE', defaultValue: "BUILD"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'ENV', defaultValue: "dev"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'MECHID', defaultValue: "id"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'KUBE_CONFIG', defaultValue: "kubeConfig-dev"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'TILLER_NAMESPACE', defaultValue: "org-onar-otf"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PKCS12_CERT', defaultValue: "otf_ssl_pkcs12_dev"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PKCS12_KEY', defaultValue: "server_ssl_key_store_password"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PEM_CERT', defaultValue: "otf_ssl_pem_dev"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PEM_KEY', defaultValue: "otf_ssl_pem_key_dev"]
+
+
+]]])
+
+
+echo "Build branch: ${env.BRANCH_NAME}"
+
+node("docker"){
+  stage 'Checkout'
+  checkout scm
+  PHASES=PHASE.tokenize( '_' );
+  echo "PHASES : " + PHASES
+  ARTIFACT_ID="otf-cert-secret-builder"
+  echo "Tiller Namespace: " + TILLER_NAMESPACE
+
+  withEnv(["PATH=${env.PATH}:${tool 'jdk180'}:${env.WORKSPACE}/linux-amd64", "JAVA_HOME=${tool 'jdk180'}","HELM_HOME=${env.WORKSPACE}"]) {
+
+    echo "PATH=${env.PATH}"
+    echo "JAVA_HOME=${env.JAVA_HOME}"
+    echo "HELM_HOME=${env.HELM_HOME}"
+
+    wrap([$class: 'ConfigFileBuildWrapper', managedFiles: [
+      [fileId: 'maven-settings.xml', variable: 'MAVEN_SETTINGS']
+      ]]) {
+
+      if (PHASES.contains("DEPLOY") || PHASES.contains("UNDEPLOY")) {
+        stage 'Init Helm'
+
+        //check if helm exists if not install
+        if(fileExists('linux-amd64/helm')){
+          sh """
+            echo "helm is already installed"
+          """
+        }
+        else{
+        //download helm
+          sh """
+            echo "installing helm"
+            wget  https://storage.googleapis.com/kubernetes-helm/helm-v2.8.2-linux-amd64.tar.gz
+            tar -xf helm-v2.8.2-linux-amd64.tar.gz
+            rm helm-v2.8.2-linux-amd64.tar.gz
+          """
+        }
+
+        withCredentials([file(credentialsId: KUBE_CONFIG, variable: 'KUBECONFIG')]) {
+
+          dir('helm'){
+              //check if charts are valid, and then perform dry run, if successful then upgrade/install charts
+
+                if (PHASES.contains("UNDEPLOY") ) {
+              stage 'Undeploy'
+
+                  sh """
+                    helm delete --tiller-namespace=$TILLER_NAMESPACE --purge $ARTIFACT_ID
+                  """
+                }
+
+              //NOTE Double quotes are used below to access groovy variables like artifact_id and tiller_namespace
+                    if (PHASES.contains("DEPLOY") ){
+                            stage 'Deploy'
+                      withCredentials(
+                        [usernamePassword(credentialsId: MECHID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD'),
+                        file(credentialsId: PKCS12_CERT, variable: 'VAR_PKCS12_CERT'),
+                        string(credentialsId: PKCS12_KEY, variable: 'VAR_PKCS12_KEY'),
+                        file(credentialsId: PEM_CERT, variable: 'VAR_PEM_CERT'),
+                        file(credentialsId: PEM_KEY, variable: 'VAR_PEM_KEY'),
+                        file(credentialsId: 'PRIVATE_KEY', variable: 'VAR_PRIVATE_KEY'),
+                        usernamePassword(credentialsId: 'PRIVATE_KEY_USER_PASS', usernameVariable: 'PRIVATE_KEY_USERNAME', passwordVariable: 'PRIVATE_KEY_PASSPHRASE')
+                        ]) {
+
+                        sh """
+
+                          cp $VAR_PKCS12_CERT $ARTIFACT_ID
+                          cp $VAR_PEM_CERT $ARTIFACT_ID
+                          cp $VAR_PEM_KEY $ARTIFACT_ID
+                          cp $VAR_PRIVATE_KEY $ARTIFACT_ID
+                          FILE_PKCS12_CERT=`basename $VAR_PKCS12_CERT`
+                          FILE_PEM_CERT=`basename $VAR_PEM_CERT`
+                          FILE_PEM_KEY=`basename $VAR_PEM_KEY`
+                          FILE_PRIVATE_KEY=`basename $VAR_PRIVATE_KEY`
+
+                          echo "Validate Yaml"
+                          helm lint $ARTIFACT_ID
+
+                          echo "View Helm Templates"
+                          helm template $ARTIFACT_ID \
+                            --set Secret.PKCS12_CERT=\$FILE_PKCS12_CERT \
+                            --set Secret.PKCS12_KEY=$VAR_PKCS12_KEY \
+                            --set Secret.PEM_CERT=\$FILE_PEM_CERT \
+                            --set Secret.PEM_KEY=\$FILE_PEM_KEY \
+                            --set Secret.privateKey.key=\$FILE_PRIVATE_KEY \
+                            --set Secret.privateKey.username=$PRIVATE_KEY_USERNAME \
+                            --set Secret.privateKey.passphrase=$PRIVATE_KEY_PASSPHRASE \
+
+                          echo "Perform Dry Run Of Install"
+                          helm upgrade --tiller-namespace=$TILLER_NAMESPACE --install --dry-run $ARTIFACT_ID $ARTIFACT_ID \
+                            --set Secret.PKCS12_CERT=\$FILE_PKCS12_CERT \
+                            --set Secret.PKCS12_KEY=$VAR_PKCS12_KEY \
+                            --set Secret.PEM_CERT=\$FILE_PEM_CERT \
+                            --set Secret.PEM_KEY=\$FILE_PEM_KEY \
+                            --set Secret.privateKey.key=\$FILE_PRIVATE_KEY \
+                            --set Secret.privateKey.username=$PRIVATE_KEY_USERNAME \
+                            --set Secret.privateKey.passphrase=$PRIVATE_KEY_PASSPHRASE \
+
+                          echo "Helm Install/Upgrade"
+                          helm upgrade --tiller-namespace=$TILLER_NAMESPACE --install $ARTIFACT_ID $ARTIFACT_ID \
+                            --set Secret.PKCS12_CERT=\$FILE_PKCS12_CERT \
+                            --set Secret.PKCS12_KEY=$VAR_PKCS12_KEY \
+                            --set Secret.PEM_CERT=\$FILE_PEM_CERT \
+                            --set Secret.PEM_KEY=\$FILE_PEM_KEY \
+                            --set Secret.privateKey.key=\$FILE_PRIVATE_KEY \
+                            --set Secret.privateKey.username=$PRIVATE_KEY_USERNAME \
+                            --set Secret.privateKey.passphrase=$PRIVATE_KEY_PASSPHRASE \
+
+                        """
+                      }
+              }
+
+           }
+        }
+      }
+    }
+  }
+}

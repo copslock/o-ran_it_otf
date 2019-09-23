@@ -1,0 +1,31 @@
+appName: otf-robot-test-head
+env: dev
+version: 0.0.1-SNAPSHOT
+image: otf-robot-test-head:0.0.5-SNAPSHOT
+namespace: org-oran-otf
+nodePort: 32224
+replicas: 1
+health : /otf/vth/robot/v1/health
+sharedCert: otf-cert-secret-builder
+robot:
+  APP_SETTINGS: "app.configuration.DevelopmentConfiguration"
+pvc:
+  dev: org-oran-otf-dev-logs-pv
+  prod: org-oran-otf-prod-logs-pv
+mongo:
+  prod:
+    OTF_MONGO_HOSTS: "localhost:18720,localhost:18720,localhost:18720/"
+    OTF_MONGO_DBOTF: "otf"
+    OTF_MONGO_REPLICASET: "otf-rs-prod2"
+  dev:
+    OTF_MONGO_HOSTS: "localhost:27017,localhost:27017,localhost:27017/"
+    OTF_MONGO_DBOTF: "otf"
+    OTF_MONGO_REPLICASET: "mongoOTF"
+  st:
+    OTF_MONGO_HOSTS: "localhost:27017,localhost:27017,localhost:27017/"
+    OTF_MONGO_DBOTF: "otf_st"
+    OTF_MONGO_REPLICASET: "mongoOTF"
+
+  username: ""
+  password: ""
+sharedSecret: otf-aaf-credential-generator

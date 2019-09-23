@@ -1,0 +1,9 @@
+appName: otf-aaf-credential-generator
+
+keyfilePath: keyfile
+
+Secret:
+    keyfileSecretPath: /opt/secret/keyfile
+    aafId: id
+    aafPassword: pass
+    aafMechPassword: mechPass

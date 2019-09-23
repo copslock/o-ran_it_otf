@@ -1,0 +1,17 @@
+appName: otf-ssh-test-head
+env: dev
+version: 0.0.1-SNAPSHOT
+image: otf-ssh-test-head:0.0.1-SNAPSHOT
+namespace: org-oran-otf
+nodePort: 32222
+replicas: 1
+health : /otf/vth/ssh/v1/health
+sharedCert: otf-cert-secret-builder
+pvc:
+  dev: org-oran-otf-dev-logs-pv
+  prod: org-oran-otf-prod-logs-pv
+
+Secret:
+  id_private_key: temp
+  id_private_key_passphrase: temp
+
