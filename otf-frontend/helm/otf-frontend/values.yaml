@@ -1,0 +1,59 @@
+appName: otf-frontend
+version: 0.0.4-SNAPSHOT
+image: otf-frontend
+namespace: 
+nodePort: 32524
+replicas:
+  dev: 2
+  st: 1
+  prod: 2
+env: dev
+AUTHENTICATION_SECRET: ""
+serviceApi:
+  prod:
+    SERVICEAPI_URL: "https://localhost:32303/otf/api/"
+    SERVICEAPI_URIEXECUTETESTINSTANCE: "testInstance/execute/v1/id/"
+  prod_dr:
+    SERVICEAPI_URL: "https://localhost:32303/otf/api/"
+    SERVICEAPI_URIEXECUTETESTINSTANCE: "testInstance/execute/v1/id/" 
+  st:
+    SERVICEAPI_URL: "https://localhost:32303/otf/api/"
+    SERVICEAPI_URIEXECUTETESTINSTANCE: "testInstance/execute/v1/id/"
+  dev:
+    SERVICEAPI_URL: "https://localhost:32303/otf/api/"
+    SERVICEAPI_URIEXECUTETESTINSTANCE: "testInstance/execute/v1/id/"
+camundaApi:
+  prod:
+    CAMUNDAAPI_URL: "https://localhost:31313/"
+  prod_dr:
+    CAMUNDAAPI_URL: "https://localhost:31313/"
+  st:
+    CAMUNDAAPI_URL: "https://localhost:31313/"
+  dev:
+    CAMUNDAAPI_URL: "https://localhost:31313/"
+mongo:
+  prod:
+    MONGO_BASEURL: "localhost:18720,localhost:18720,localhost:18720/"
+    MONGO_DBOTF: "otf"
+    MONGO_REPLICASET: "otf-rs-prod2"
+  st:
+    MONGO_BASEURL: "localhost:27017,localhost:27017,localhost:27017/"
+    MONGO_DBOTF: "otf_st"
+    MONGO_REPLICASET: "mongoOTF"
+  dev:
+    MONGO_BASEURL: "localhost:27017,localhost:27017,localhost:27017/"
+    MONGO_DBOTF: "otf"
+    MONGO_REPLICASET: "mongoOTF"
+  username: ""
+  password: ""
+otf:
+  OTF_EMAIL: "OTF_NO-REPLY@localhost.com"
+  OTF_URL:
+    dev: "https://localhost:32524/"
+    st: "https://localhost:32524/"
+    prod: "https://localhost:32524/"
+
+sharedSecret: otf-aaf-credential-generator
+sharedCert: otf-cert-secret-builder
+
+healthEndpoint: otf/api/health/v1

@@ -1,0 +1,139 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div(style="position: relative;", ng-model)
+
+  .row()
+
+    h4(mat-dialog-title, style="padding-left: 15px;") Statistics Filters
+
+    button(mat-icon-button, (click)="close()", style="position: absolute; right: 0px;")
+      mat-icon close
+
+  div(mat-dialog-content)
+
+    //- mat-expansion-panel(style="margin-top: 5px;")
+    //-   mat-expansion-panel-header 
+    //-     mat-panel-title(style="font-weight: bold") Overall
+    //-     //- mat-panel-description Filters for all charts. 
+    //-   .row
+    //-     .col-3
+    //-       mat-form-field
+    //-         input(matInput, [matDatepicker]="allStartPicker", [(ngModel)]="allFilters.startDate", [min]="minDate", [max]="maxDate", placeholder="Start Date")
+    //-         mat-datepicker-toggle(matSuffix [for]="allStartPicker")
+    //-         mat-datepicker(#allStartPicker)
+
+    //-       mat-form-field
+    //-         input(matInput, [matDatepicker]="allEndPicker", [(ngModel)]="allFilters.endDate", [min]="minDate", [max]="maxDate", placeholder="End Date")
+    //-         mat-datepicker-toggle(matSuffix [for]="allEndPicker")
+    //-         mat-datepicker(#allEndPicker)
+
+    mat-expansion-panel
+      mat-expansion-panel-header 
+        mat-panel-title(style="font-weight: bold") Test Definitions
+        //- mat-panel-description Filters for test definition charts.
+      .row
+        .col-6
+
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              mat-label Test Definitions
+              mat-select( [(value)]="tdFilters.selected", multiple)
+                mat-option(*ngFor="let testDefinition of testDefinitions", [value]="testDefinition") {{testDefinition.viewValue}}
+
+        .col-6
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              input(matInput, [matDatepicker]="TDStartPicker", [(ngModel)]="tdFilters.startDate", [min]="minDate", [max]="maxDate", placeholder="Start Date")
+              mat-datepicker-toggle(matSuffix [for]="TDStartPicker")
+              mat-datepicker(#TDStartPicker)
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              input(matInput, [matDatepicker]="TDEndPicker", [(ngModel)]="tdFilters.endDate", [min]="minDate", [max]="maxDate", placeholder="End Date")
+              mat-datepicker-toggle(matSuffix [for]="TDEndPicker")
+              mat-datepicker(#TDEndPicker) 
+
+    mat-expansion-panel
+      mat-expansion-panel-header 
+        mat-panel-title(style="font-weight: bold") Test Instances
+        //- mat-panel-description Filters for test instance charts.
+      .row
+
+        .col-6
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              mat-label Test Definitions
+              mat-select([(value)]="tiFilters.selectedTDs", multiple)
+                mat-option(*ngFor="let testDefinition of testDefinitions", [value]="testDefinition.id") {{testDefinition.viewValue}}
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              mat-label Test Instances
+              mat-select([(value)]="tiFilters.selectedTIs", multiple)
+                mat-option(*ngFor="let testInstance of testInstances", [value]="testInstance.id") {{testInstance.viewValue}}
+
+        .col-6
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              input(matInput, [matDatepicker]="TIStartPicker", [(ngModel)]="tiFilters.startDate", [min]="minDate", [max]="maxDate", placeholder="Start Date")
+              mat-datepicker-toggle(matSuffix [for]="TIStartPicker")
+              mat-datepicker(#TIStartPicker)
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              input(matInput, [matDatepicker]="TIEndPicker", [(ngModel)]="tiFilters.endDate", [min]="minDate", [max]="maxDate", placeholder="End Date")
+              mat-datepicker-toggle(matSuffix [for]="TIEndPicker")
+              mat-datepicker(#TIEndPicker) 
+
+    mat-expansion-panel(style="margin-bottom: 5px;")
+      mat-expansion-panel-header 
+        mat-panel-title(style="font-weight: bold") Scheduled Tests
+        //- mat-panel-description Filters for test schedule table.
+
+      .row   
+
+        .col-6
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              mat-label Test Instances
+              mat-select([(value)]="scheduleFilters.selectedInstances", multiple)
+                mat-option(*ngFor="let instance of testInstances", [value]="instance.id") {{instance.viewValue}}
+
+        .col-6
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              input(matInput, [matDatepicker]="scheduleStartPicker", [(ngModel)]="scheduleFilters.startDate", placeholder="Start Date")
+              mat-datepicker-toggle(matSuffix [for]="scheduleStartPicker")
+              mat-datepicker(#scheduleStartPicker)
+          .row
+            mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+              input(matInput, [matDatepicker]="scheduleEndPicker", [(ngModel)]="scheduleFilters.endDate", placeholder="End Date")
+              mat-datepicker-toggle(matSuffix [for]="scheduleEndPicker")
+            mat-datepicker(#scheduleEndPicker)
+
+        //- .col-3
+        //-   .row
+        //-     mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+        //-       input(matInput, [matDatepicker]="scheduleStartTimePicker", [(ngModel)]="scheduleFilters.timeRangeStart", [min]="minDate", [max]="maxDate", placeholder="Time Range Start")
+        //-       mat-datepicker-toggle(matSuffix [for]="scheduleStartTimePicker")
+        //-       mat-datepicker(#scheduleStartTimePicker)
+        //-   .row
+        //-     mat-form-field(style="margin-left: auto; margin-right: auto; width: 90%")
+        //-       input(matInput, [matDatepicker]="scheduleEndTimePicker", [(ngModel)]="scheduleFilters.timeRangeEnd", [min]="minDate", [max]="maxDate", placeholder="Time Range End")
+        //-       mat-datepicker-toggle(matSuffix [for]="scheduleEndTimePicker")
+        //-     mat-datepicker(#scheduleEndTimePicker)
+
+    .row(style="padding: 10px;")
+      //- button(mat-raised-button, style="margin-left: auto; margin-right: 5px;") Clear All
+      button(mat-raised-button, color="primary", style="margin-right: auto; margin-left: auto;", (click)="onConfirm()") Set

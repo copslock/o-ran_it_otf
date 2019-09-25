@@ -1,0 +1,108 @@
+otf:
+  environment: ${ENV}
+  mode: 'debug'
+  camunda:
+    bpm:
+      admin-user:
+        id: 'username'
+        password: 'password'
+        firstName: 'firstname'
+    executor:
+      async.core-pool-size: 50
+      async.max-pool-size: 400
+      async.queue-capacity: 25
+    external-task-client:
+      retry-limit: 0
+      fetch-interval-ms: 1000
+      lock-duration-ms: 43200000
+      max-tasks: 10
+      worker-id: 'otf-camunda-etw'
+    graceful-shutdown:
+      wait-time: 300000
+    executors-active: ${EXECUTORS_ACTIVE}
+    mysql:
+      url: jdbc:mysql://${OTF_CAMUNDA_DB_URL}?useSSL=false&serverTimezone=UTC #&logger=com.mysql.cj.log.Slf4JLogger&profileSQL=true
+      username: ${OTF_CAMUNDA_DB_USERNAME}
+      password: ${OTF_CAMUNDA_DB_PASSWORD}
+  cadi:
+    enabled: true
+    aaf-mech-id: ${AAF_ID}
+    aaf-mech-password: ${AAF_MECH_PASSWORD}
+    aaf-perm-type: ${AAF_PERM_TYPE}
+    hostname: ${CADI_HOSTNAME}
+    keyfile: ${CADI_KEYFILE}
+    aaf-call-timeout: 10000
+    aaf-conn-timeout: 6000
+    aaf-default-realm: 'localhost'
+    aaf-env: 'PROD'
+    aaf-locate-url: 'https://localhost'
+    aaf-lur-class: 'org.onap.aaf.cadi.aaf.v2_0.AAFLurPerm'
+    aaf-url: 'https://localhost'
+    basic-realm: 'localhost'
+    basic-warn: true
+    cadi-latitude: '38.62782'
+    cadi-logLevel: '16384'
+    cadi-longitude: '-90.19458'
+    cadi-protocols: 'TLSv1.1,TLSv1.2'
+
+  mongo:
+    hosts: ${OTF_MONGO_HOSTS}
+    username: ${OTF_MONGO_USERNAME}
+    password: ${OTF_MONGO_PASSWORD}
+    replica-set: ${OTF_MONGO_REPLICASET}
+    database: ${OTF_MONGO_DATABASE}
+  ssl:
+    key-store-type: 'PKCS12'
+    keystore-path: ${OTF_CERT_PATH}
+    keystore-password: ${OTF_CERT_PASS}
+
+#https://stackoverflow.com/questions/50387638/spring-boot-jersey-type-filter-bad-request-400-for-service-consumes-multipar/50423639#50423639
+spring.jersey.filter.order: -100000
+spring.main.allow-bean-definition-overriding: true
+server:
+  port: 8443
+  port.http: 8000
+  tomcat.max-threads: 800
+#  ssl:
+    key-store-type: 'PKCS12'
+    key-store: ${OTF_CERT_PATH}
+    key-store-password: ${OTF_CERT_PASS}
+security:
+  https-only: true
+  require-ssl: false
+  server.port: 8443
+  server.port.http: 8080
+#  server.tomcat.max-threads=800
+#  security.require-ssl=true
+#  server.ssl.key-store-type=PKCS12
+#  server.ssl.key-store=${OTF_CERT_PATH}
+#  server.ssl.key-store-password=${OTF_CERT_PASS}
+
+camunda.bpm.job-execution.enabled: true
+camunda.bpm.job-execution.queueSize: 25
+camunda.bpm.job-execution.corePoolSize: 50
+camunda.bpm.job-execution.maxPoolSize: 400
+#camunda.bpm.job-execution.max-jobs-per-acquisition: 99
+
+camunda.bpm.database.schema-update: true
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
+
+logging.file.max-history: 5
+logging.file: otf/logs/camunda.log
+logging.path: otf/logs
+
+#logging:
+#  level:
+#    org.camunda.bpm.engine.jobexecutor: OFF
+#    org.camunda.bpm.engine.context: OFF
+#    org.camunda.bpm.extension.reactor.projectreactor: OFF
+    #org.camunda.bpm.extension.reactor.projectreactor.routing.ConsumerFilterRouter: OFF
+    #org.camunda.bpm.extension.reactor.projectreactor: INFO
+    #org.camunda.engine.ProcessEngineException: INFO
+    #org.camunda.bpm.cfg: DEBUG
+    #org.camunda.bpm.engine.impl.persistence.entity.JobEntity: DEBUG
+    #org.camunda.bpm.engine.cmd: DEBUG
+    #org.springframework.web: DEBUG
+    #org.camunda.bpm.engine.rest: DEBUG

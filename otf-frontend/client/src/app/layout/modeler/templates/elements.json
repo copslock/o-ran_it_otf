@@ -1,0 +1,20 @@
+{
+  "name": "Virtual Test Head",
+  "id": "com.camunda.example.CallTestHeadTask",
+  "appliesTo": [
+    "bpmn:Task",
+    "bpmn:CallActivity"
+  ],
+  "properties": [
+    {
+      "label": "Name",
+      "type": "String",
+      "value": "VTH:",
+      "editable": true,
+      "binding": {
+        "type": "camunda:field",
+        "name": "camunda:name"
+      }
+    }
+  ]
+}

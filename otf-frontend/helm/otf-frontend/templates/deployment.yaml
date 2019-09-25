@@ -1,0 +1,218 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{ .Values.appName}}
+    version: {{.Values.version}}
+spec:
+  revisionHistoryLimit: 1   # keep one replica set to allow rollback
+  minReadySeconds: 10
+  strategy:
+    # indicate which strategy we want for rolling update
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+  replicas: {{ .Values.replicas.prod}}
+  {{ else if  eq .Values.env "st"}}
+  replicas: {{ .Values.replicas.st}}
+  {{ else }}
+  replicas: {{ .Values.replicas.dev}}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName}}
+      version: {{.Values.version}}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName}}
+        version: {{.Values.version}}
+    spec:
+      serviceAccount: default
+      volumes:
+      - name: {{ .Values.appName}}-cert-volume
+        secret:
+          secretName: {{.Values.sharedCert}}
+          optional: true
+          items:
+          - key: PEM_CERT
+            path: otf.pem
+          - key: PEM_KEY
+            path: privateKey.pem
+      containers:
+      - name: {{ .Values.appName}}
+        image: {{ .Values.image}}
+        imagePullPolicy: Always
+        ports:
+        - name: https
+          containerPort: 443
+          nodePort: {{.Values.nodePort}}
+          protocol: TCP
+        {{ if eq .Values.env "st"}}
+        resources:
+          limits:
+            memory: "5Gi"
+            cpu: "3"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        {{else}}
+        resources:
+          limits:
+            memory: "10Gi"
+            cpu: "6"
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+        {{end}}
+        env:
+        - name: ENV
+          {{ if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: "production"
+          {{ else if eq .Values.env "st" }}
+          value: "system_test"
+          {{ else }}
+          value: "development"
+          {{ end }}
+        - name: NAMESPACE
+          value: {{.Values.namespace}}
+        - name: APP_NAME
+          value: {{ .Values.appName}}
+        - name: APP_VERSION
+          value: {{.Values.version}}
+        - name: OTF_URL
+          {{ if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{.Values.otf.OTF_URL.prod | quote}}
+          {{ else if eq .Values.env "st" }}
+          value: {{.Values.otf.OTF_URL.st | quote}}
+          {{ else }}
+          value: {{.Values.otf.OTF_URL.dev | quote}}
+          {{ end }}
+        - name: OTF_EMAIL
+          value: {{.Values.otf.OTF_EMAIL | quote}}
+        - name: AUTHENTICATION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: authentication_secret
+              optional: true
+        - name: SERVICEAPI_URL
+          {{ if eq .Values.env "prod" }}
+          value: {{.Values.serviceApi.prod.SERVICEAPI_URL | quote}}
+          {{ else if eq .Values.env "prod-dr" }}
+          value: {{.Values.serviceApi.prod_dr.SERVICEAPI_URL | quote}}
+          {{ else if eq .Values.env "st" }}
+          value: {{.Values.serviceApi.st.SERVICEAPI_URL | quote}}
+          {{ else }}
+          value: {{.Values.serviceApi.dev.SERVICEAPI_URL | quote}}
+          {{ end }}
+        - name: SERVICEAPI_URIEXECUTETESTINSTANCE
+          {{ if eq .Values.env "prod" }}
+          value: {{.Values.serviceApi.prod.SERVICEAPI_URIEXECUTETESTINSTANCE | quote}}
+          {{ else if eq .Values.env "prod-dr" }}
+          value: {{.Values.serviceApi.prod_dr.SERVICEAPI_URIEXECUTETESTINSTANCE | quote}}          
+          {{ else if eq .Values.env "st" }}
+          value: {{.Values.serviceApi.st.SERVICEAPI_URIEXECUTETESTINSTANCE | quote}}
+          {{ else }}
+          value: {{.Values.serviceApi.dev.SERVICEAPI_URIEXECUTETESTINSTANCE | quote}}
+          {{ end }}
+        - name: SERVICEAPI_AAFID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_id
+              optional: true
+        - name: SERVICEAPI_AAFPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_mech_password
+              optional: true
+        - name: CAMUNDAAPI_URL
+          {{ if eq .Values.env "prod" }}
+          value: {{ .Values.camundaApi.prod.CAMUNDAAPI_URL | quote}}
+          {{ else if eq .Values.env "prod-dr" }}
+          value: {{ .Values.camundaApi.prod_dr.CAMUNDAAPI_URL | quote}}          
+          {{ else if eq .Values.env "st" }}
+          value: {{ .Values.camundaApi.st.CAMUNDAAPI_URL | quote}}
+          {{ else }}
+          value: {{ .Values.camundaApi.dev.CAMUNDAAPI_URL | quote}}
+          {{ end }}
+        - name: CAMUNDAAPI_AAFID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_id
+              optional: true
+        - name: CAMUNDAAPI_AAFPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_mech_password
+              optional: true
+        - name: MONGO_BASEURL
+          {{ if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.mongo.prod.MONGO_BASEURL | quote}}
+          {{ else if eq .Values.env "st" }}
+          value: {{ .Values.mongo.st.MONGO_BASEURL | quote}}
+          {{ else }}
+          value: {{ .Values.mongo.dev.MONGO_BASEURL | quote}}
+          {{ end }}
+        - name: MONGO_DBOTF
+          {{ if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.mongo.prod.MONGO_DBOTF | quote }}
+          {{ else if eq .Values.env "st" }}
+          value: {{ .Values.mongo.st.MONGO_DBOTF | quote }}
+          {{ else }}
+          value: {{ .Values.mongo.dev.MONGO_DBOTF | quote }}
+          {{ end }}
+        - name: MONGO_REPLICASET
+          {{ if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.mongo.prod.MONGO_REPLICASET | quote }}
+          {{ else if eq .Values.env "st" }}
+          value: {{ .Values.mongo.st.MONGO_REPLICASET | quote }}
+          {{ else }}
+          value: {{ .Values.mongo.dev.MONGO_REPLICASET | quote }}
+          {{ end }}
+        - name: MONGO_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: mongo_username
+              optional: true
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: mongo_password
+              optional: true
+        volumeMounts:
+        - name: {{.Values.appName}}-cert-volume
+          mountPath: /home/node/server/config/cert/
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.healthEndpoint }}
+            port: https
+            scheme: HTTPS
+            httpHeaders:
+              - name: X-Custom-Header
+                value: Alive
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthEndpoint }}
+            port: https
+            scheme: HTTPS
+            httpHeaders:
+              - name: X-Custom-Header
+                value: Ready
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+      restartPolicy: Always

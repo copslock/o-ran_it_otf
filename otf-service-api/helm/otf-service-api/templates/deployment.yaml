@@ -1,0 +1,280 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{ .Values.appName}}
+    version: {{.Values.version}}
+spec:
+  {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+  replicas: {{ .Values.replicas.prod}}
+  {{ else if  eq .Values.env "st"}}
+  replicas: {{ .Values.replicas.st}}
+  {{ else }}
+  replicas: {{ .Values.replicas.dev}}
+  {{ end }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName}}
+      version: {{.Values.version}}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName}}
+        version: {{.Values.version}}
+    spec:
+      revisionHistoryLimit: 1   # keep one replica set to allow rollback
+      minReadySeconds: 10
+      strategy:
+        # indicate which strategy we want for rolling update
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 1
+      serviceAccount: default
+      volumes:
+      - name: {{ .Values.appName}}-aaf-volume
+        secret:
+          secretName: {{.Values.sharedSecret}}
+      - name: {{ .Values.appName}}-keyfile-volume
+        secret:
+          secretName: {{.Values.sharedSecret}}
+          optional: true
+          items:
+          - key: cadi_keyfile
+            path: keyfile
+      - name: {{ .Values.appName}}-cert-volume
+        secret:
+          secretName: {{.Values.sharedCert}}
+          optional: true
+          items:
+          - key: PKCS12_CERT
+            {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+            path: {{ .Values.cert.prod.name | quote }}
+            {{ else if eq  .Values.env "st" }}
+            path: {{ .Values.cert.st.name | quote }}
+            {{ else }}
+            path: {{ .Values.cert.dev.name | quote }}
+            {{ end }}          
+      {{ if or (eq .Values.env "st") (eq .Values.env "prod-dr")}}
+      {{else}}
+      - name: logging-pvc
+        persistentVolumeClaim:
+          {{if eq .Values.env "prod"}}
+          claimName: {{ .Values.pvc.prod | quote }}
+          {{ else }}
+          claimName: {{ .Values.pvc.dev | quote }}
+          {{ end }}
+      {{end}}
+      containers:
+      - name: {{ .Values.appName}}
+        image: {{ .Values.image}}
+        imagePullPolicy: Always
+        ports:
+        - name: https
+          containerPort: 8443
+          nodePort: {{.Values.nodePort}}
+          protocol: TCP
+        {{ if eq .Values.env "st"}}
+        resources:
+          limits: 
+            memory: "3Gi"
+            cpu: "1.8"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        {{else}}  
+        resources:
+          limits:
+            memory: "6Gi"
+            cpu: "4"
+          requests:
+            memory: "2Gi"
+            cpu: "1.5"
+        {{ end }}
+        env:
+        - name: NAMESPACE
+          value: {{.Values.namespace}}
+        - name: APP_NAME
+          value: {{ .Values.appName}}
+        - name: AAF_PERM_TYPE
+          {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.aafPermType.prod | quote }}
+          {{ else if  eq .Values.env "st"}}
+          value: {{ .Values.aafPermType.st | quote }}
+          {{ else }}
+          value: {{ .Values.aafPermType.dev | quote }}
+          {{ end }}                 
+        - name: AAF_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_id
+              optional: true
+        - name: AAF_MECH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_mech_password
+              optional: true
+        - name: AAF_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: aaf_password
+              optional: true
+        - name: CADI_KEYFILE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedSecret}}
+              key: keyfile_secret_path
+              optional: true
+        - name: CADI_HOSTNAME
+          {{if eq .Values.env "prod"}}
+          value: {{ .Values.cadiHostname.prod | quote }}
+          {{else if  eq .Values.env "prod-dr"}}
+          value: {{ .Values.cadiHostname.prod_dr | quote }}
+          {{else if  eq .Values.env "st"}}
+          value: {{ .Values.cadiHostname.st | quote }} 
+          {{ else }}
+          value: {{ .Values.cadiHostname.dev | quote }}
+          {{ end }}
+        - name: APP_VERSION
+          value: {{.Values.version}}
+        - name: OTF_MONGO_HOSTS
+          {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.otf.mongo.prod.host | quote }}
+          {{ else if eq  .Values.env "st" }}
+          value: {{ .Values.otf.mongo.st.host | quote }}
+          {{ else }}
+          value: {{ .Values.otf.mongo.dev.host | quote }}
+          {{ end }}
+        - name: OTF_MONGO_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: mongo_username
+              optional: true
+        - name: OTF_MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: mongo_password
+              optional: true
+        - name: OTF_MONGO_REPLICASET
+          {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.otf.mongo.prod.replicaSet | quote }}
+          {{else if  eq .Values.env "st"}}
+          value: {{ .Values.otf.mongo.st.replicaSet | quote }}
+          {{ else }}
+          value: {{ .Values.otf.mongo.dev.replicaSet | quote }}
+          {{ end }}
+        - name: OTF_MONGO_DATABASE
+          {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.otf.mongo.prod.database | quote }}
+          {{else if  eq .Values.env "st"}}
+          value: {{ .Values.otf.mongo.st.database | quote }}
+          {{ else }}
+          value: {{ .Values.otf.mongo.dev.database | quote }}
+          {{ end }}
+        - name: otf.camunda.host
+          {{if eq .Values.env "prod"}}
+          value: {{ .Values.otf.camunda.prod.host | quote }}
+          {{ else if eq  .Values.env "prod-dr" }}
+          value: {{ .Values.otf.camunda.prod_dr.host | quote }}
+          {{ else if eq  .Values.env "st" }}
+          value: {{ .Values.otf.camunda.st.host | quote }}
+          {{ else }}
+          value: {{ .Values.otf.camunda.dev.host | quote }}
+          {{ end }}
+        - name: otf.camunda.port
+          {{if eq .Values.env "prod"}}
+          value: {{ .Values.otf.camunda.prod.port | quote }}
+          {{ else if eq  .Values.env "prod-dr" }}
+          value: {{ .Values.otf.camunda.prod_dr.port | quote }}
+          {{ else if eq .Values.env "st"}}
+          value: {{ .Values.otf.camunda.st.port | quote }}
+          {{ else }}
+          value: {{ .Values.otf.camunda.dev.port | quote }}
+          {{ end }}
+        - name: otf.camunda.executionUri
+          value: {{.Values.otf.camunda.executionUri | quote }}
+        - name: otf.camunda.pollingUri
+          value: {{.Values.otf.camunda.pollingUri | quote }}
+        - name: otf.camunda.deploymentUri
+          value: {{.Values.otf.camunda.deploymentUri | quote }}
+        - name: otf.camunda.processDefinitionKeyUri
+          value: {{.Values.otf.camunda.processDefinitionKeyUri | quote }}
+        - name: otf.camunda.deploymentDeletionUri
+          value: {{.Values.otf.camunda.deploymentDeletionUri | quote }}
+        - name: otf.camunda.testDefinitionDeletionUri
+          value: {{.Values.otf.camunda.testDefinitionDeletionUri | quote }}
+
+        - name: otf.camunda.uri.execute-test
+          value: {{.Values.otf.camunda.uri.execute_test | quote }}
+        - name: otf.camunda.uri.process-instance-completion-check
+          value: {{.Values.otf.camunda.uri.process_instance_completion_check | quote }}
+        - name: otf.camunda.uri.deploy-test-strategy-zip
+          value: {{.Values.otf.camunda.uri.deploy_test_strategy_zip | quote }}
+        - name: otf.camunda.uri.process-definition
+          value: {{.Values.otf.camunda.uri.process_definition | quote }}
+        - name: otf.camunda.uri.delete-test-strategy
+          value: {{.Values.otf.camunda.uri.delete_test_strategy | quote }}
+        - name: otf.camunda.uri.delete-test-strategy-test-definition-id
+          value: {{.Values.otf.camunda.uri.delete_test_strategy_test_definition_id | quote }}
+        - name: otf.camunda.uri.health
+          value: {{.Values.otf.camunda.uri.health | quote }}
+
+        - name: otf.api.poll-interval
+          value: {{.Values.otf.api.poll_interval | quote}}
+        - name: otf.api.poll-attempts
+          value: {{.Values.otf.api.poll_attempts | quote}}
+
+        - name: OTF_CERT_PATH
+          {{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+          value: {{ .Values.cert.prod.path | quote }}
+          {{ else if eq .Values.env "st"}}
+          value: {{ .Values.cert.st.path | quote }}
+          {{ else }}
+          value: {{ .Values.cert.dev.path | quote }}
+          {{ end }}  
+        - name: OTF_CERT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sharedCert}}
+              key: PKCS12_KEY
+              optional: true   
+        volumeMounts:
+        - name: {{.Values.appName}}-keyfile-volume
+          mountPath: /opt/secret
+        - name: {{.Values.appName}}-cert-volume
+          mountPath: /opt/cert
+        {{ if or (eq .Values.env "st") (eq .Values.env "prod-dr")}}
+        {{else}}
+        - name: logging-pvc
+          mountPath: "/otf/logs"
+        {{end}} 
+        livenessProbe:
+          httpGet:
+            path: /otf/api/health/v1
+            port: https
+            scheme: HTTPS
+            httpHeaders:
+            - name: X-Custom-Header
+              value: Alive
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /otf/api/health/v1
+            port: https
+            scheme: HTTPS
+            httpHeaders:
+            - name: X-Custom-Header
+              value: Ready
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+      restartPolicy: Always

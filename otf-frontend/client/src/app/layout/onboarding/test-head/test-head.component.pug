@@ -1,0 +1,52 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div([@routerTransition])
+  app-page-header([heading]="'Onboarding'", [icon]="'fa-edit'")
+  
+  ol.breadcrumb.bg-light
+    li.breadcrumb-item
+      a(href="#") Onboarding
+    li.breadcrumb-item.active Test Heads
+
+
+  .row.mb-5
+    .col-sm-8
+      mat-card
+        mat-card-header.bg-primary.text-white
+          mat-card-title 
+            h4 Create Test Head
+        mat-card-content
+          app-create-test-head-form([options]="createFormOptions")
+      //.card.mb-12.bg-light.border-primary
+        .card-header.bg-primary.text-white.text-center
+          h4 New Virtual Test Head
+        .card-body
+          app-create-test-head-form([options]="createFormOptions")
+
+    .col-sm-4
+      h4 Saved Test Heads
+
+      input.form-control.bg-light.mb-3([(ngModel)]="search.testHeadName", type="text", placeholder="Search...")
+      .list-group
+          a.list-group-item.list-group-item-action((click)="openTestHead(vth)",*ngFor="let vth of vth_list | filterBy: search", style="cursor:pointer")
+            b {{ vth.testHeadName }}
+
+.footer.bg-primary
+  .row.p-2
+    .col-sm-12
+      //button(mat-raised-button, color="primary", (click)="back()") Back
+      //button.pull-right(mat-raised-button, color="accent", (click)="next()") Next

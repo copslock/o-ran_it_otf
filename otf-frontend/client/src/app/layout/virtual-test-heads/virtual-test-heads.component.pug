@@ -1,0 +1,80 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div([@routerTransition])
+  app-page-header([heading]="'Virtual Test Heads'", [icon]="'fa-edit'")
+  
+  .card-mb-12 
+    .pull-left
+      mat-form-field
+        input(matInput, name="filter", (keyup)="applyFilter($event.target.value)", placeholder="Filter")
+    .pull-right
+      button(mat-raised-button, color="primary", (click)="createTestHead()") New
+
+    div(style="width: 100%", [hidden]="!loading")
+      mat-spinner(style="margin: auto", color="primary")
+    
+    table.mat-elevation-z8(mat-table, [dataSource]="dataSource", style="width: 100%", [hidden]="loading")
+
+      ng-container(matColumnDef="name")
+        th(mat-header-cell, *matHeaderCellDef) Name
+        td(mat-cell, *matCellDef="let element", [routerLink]="['/test-heads', element._id]") {{ element.testHeadName}}
+
+      ng-container(matColumnDef="description")
+        th(mat-header-cell, *matHeaderCellDef) Description
+        td(mat-cell, *matCellDef="let element", [routerLink]="['/test-heads', element._id]") {{ element.testHeadDescription}}
+
+      ng-container(matColumnDef="options")
+        th(mat-header-cell, *matHeaderCellDef) Options
+        td(mat-cell, *matCellDef="let element")
+          button.mr-3(mat-mini-fab, aria-label='Edit', color="primary", (click)='editTestHead(element)')
+            i.fa.fa-pencil
+          button.text-white(mat-mini-fab, aria-label='Remove', color='warn', (click)='deleteTestHead(element)')
+            i.fa.fa-remove
+
+      tr(mat-header-row, *matHeaderRowDef="displayedColumns")
+      tr(mat-row, *matRowDef="let row; columns: displayedColumns")
+
+    mat-paginator([length]="resultsLength", [pageSizeOptions]="[10, 25, 100]", [hidden]="loading")
+
+    //.card-body
+      .row
+        div.col-6
+          input.form-control.bg-light.mb-1([(ngModel)]="search.test_head_id", type="text", placeholder="Search...")
+        div.col-6
+          button.bg-primary.mbtn.pull-right.text-white.mb-1(mat-raised-button, (click)='createTestHead()') Create VTH
+      table.table.table-striped([mfData]='data', #mf='mfDataTable', [mfRowsOnPage]='5')
+        thead
+          tr
+            th(style='width: 20%')
+              mfDefaultSorter(by='name') Name
+            th(style='width: 50%')
+              mfDefaultSorter(by='creator') Creator
+            th(style='width: 10%')
+              mfDefaultSorter(by='date') Date 
+            th(style='width: 20%') Options   
+        tbody
+          tr
+            td Ping Test Head
+            td Tiffany, Patrick 
+            td 7/21/18
+            td 
+              button.bg-primary.mbtn.text-white.mr-1(mat-mini-fab, aria-label='View', (click)='viewTestHead(null)') 
+                i.fa.fa-eye
+              button.bg-primary.mbtn.text-white.mr-1(mat-mini-fab, aria-label='Edit', (click)='editTestHead()')
+                i.fa.fa-pencil
+              button.mbtn.text-white(mat-mini-fab, aria-label='Remove', color='warn', (click)='deleteTestHead()')
+                i.fa.fa-remove

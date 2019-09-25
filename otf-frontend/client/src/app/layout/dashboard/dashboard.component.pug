@@ -1,0 +1,115 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div(style="position: relative")
+  .row
+    .col-12
+      .pull-left
+        mat-form-field(style="width:110px")
+          input(matInput, [matDatepicker]="fromPicker", placeholder="From Date", [(ngModel)]="stats.filters.startDate")
+          mat-datepicker-toggle(matSuffix, [for]="fromPicker")
+          mat-datepicker(#fromPicker)
+        mat-form-field.ml-2(style="width:110px")
+          input(matInput, [matDatepicker]="toPicker", placeholder="To Date", [(ngModel)]="stats.filters.endDate")
+          mat-datepicker-toggle(matSuffix, [for]="toPicker")
+          mat-datepicker(#toPicker)
+        button.ml-2(mat-icon-button, (click)="stats.getDefaultData(_groups.getGroup())") 
+          mat-icon arrow_forward
+          
+      .pull-right
+        mat-form-field
+          input(matInput, [ngModel]="stats.executionList?.length", placeholder="Total Executions", disabled)
+  //- div
+  //-   button.pull-right(mat-button, (click)="openFilterModal()")
+  //-     mat-icon() filter_list
+  //-     span(style="font-size: 13px") Filter
+
+  //-   button.pull-right(mat-button, (click)="resetData()")
+  //-     mat-icon() refresh
+  //-     span(style="font-size: 13px") Reset
+
+  .row
+    .col-12
+      mat-card
+        mat-card-content
+          app-line-chart(height="201px")
+
+  .row.mt-2
+    .col-lg-5
+      mat-card
+        mat-card-header
+          mat-card-title 
+            h5 Test Results
+        mat-card-content
+          app-pie-chart(height="230px")
+    
+    .col-lg-7
+      mat-card
+        mat-card-header
+          mat-card-title 
+            h5 Test Definition Usage
+        mat-card-content
+          app-test-definition-executions-bar-chart(height="230px")
+  .row.mt-2
+    
+    .col-lg-7
+      mat-card
+        mat-card-header
+          mat-card-title 
+            h5 Virtual Test Head Executions
+        mat-card-content
+          app-test-head-executions-line-chart(height="230px")
+    
+    .col-lg-5
+      mat-card
+        mat-card-header
+          mat-card-title 
+            h5 Virtual Test Head Usage & Status Codes
+        mat-card-content
+          app-test-head-execution-bar-chart(height="230px")
+  //- mat-card.w-100
+  //-   mat-card-header
+  //-     mat-card-title(style="font-weight: bold") Selected Definitions: 
+  //-       span(style="color: #4F8CA9") {{TD_selectedTDs}}
+
+  //-   .row.mb-4  
+  //-     .col-md-7
+  //-       app-line-chart(height="380px")
+
+  //-     .col-md-5
+  //-       app-pie-chart(height="380px")
+
+  //- mat-card.w-100
+  //-   mat-card-header
+  //-     mat-card-title(style="font-weight: bold") Selected Instances: 
+  //-       span(style="color: #4F8CA9") {{TI_selectedTIs}}
+  //-     mat-card-title(style="font-weight: bold") Selected Definitions: 
+  //-       span(style="color: #4F8CA9") {{TI_selectedTDs}}
+  //-   .row.mb-4
+  //-     .col-md-7
+  //-       app-multi-line-chart(height="380px")
+  //-     .col-md-5
+  //-       app-horiz-bar-chart(height="380px")
+  
+  //- mat-card.w-100
+  //-   mat-card-header
+  //-     mat-card-title(style="font-weight: bold") Scheduled Tests 
+  //-     mat-card-title(style="font-weight: bold") Selected Instances: 
+  //-       span(style="color: #4F8CA9") {{sched_selectedTIs}}
+  //-   .row
+  //-     .col-md-4
+  //-       app-schedule
+

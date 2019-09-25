@@ -1,0 +1,111 @@
+<!-- Copyright (c) 2019 AT&T Intellectual Property.                            #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+#############################################################################-->
+
+
+<nav class="navbar navbar-expand-lg fixed-top">
+        <img src="../../../../assets/images/NetworkLogo.jpg" class="rounded-circle mr-2" style="width:40px; height: 40px;" />
+        <a class="navbar-brand" href="#">Open Test Framework</a>
+        <span *ngIf="groups">
+            <button mat-button style="color:white" #goupMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="groupMenu">{{ selectedGroup?.groupName || 'Select Group' }} <mat-icon>arrow_drop_down</mat-icon></button>
+            <mat-menu #groupMenu="matMenu">
+                <span style="margin-left: 15px; cursor: pointer; color: #007bff" (click)="createGroup()">+ New Group</span>
+                <span *ngFor="let group of groups">
+                    <!-- Handle branch node buttons here -->
+                    <span *ngIf="group.children && group.children.length > 0" style="z-index:1031">
+                        <button mat-menu-item [matMenuTriggerFor]="menu.childMenu" (click)="changeGroup(group)" [disabled]="group.disabled">
+                            {{group.displayName}}
+                        </button>
+                        <app-menu-item #menu [items]="group.children" (dataEvent)="changeGroup($event)"></app-menu-item>
+                    </span>
+                    <!-- Leaf node buttons here -->
+                    <span *ngIf="!group.children || group.children.length === 0" style="z-index:1031">
+                        <button mat-menu-item color="primary" (click)="changeGroup(group)">
+                            {{group.displayName}}
+                        </button>
+                    </span>
+                </span>
+            </mat-menu>
+        </span>
+        <button class="navbar-toggler" type="button" (click)="toggleSidebar()">
+            <!-- <span class="navbar-toggler-icon"></span> -->
+            <i class="fa fa-bars text-muted" aria-hidden="true"></i>
+        </button>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <!-- <li class="nav-item dropdown" ngbDropdown>
+                    <a href="javascript:void(0)" class="nav-link" ngbDropdownToggle>
+                        <i class="fa fa-language"></i> {{ 'Language' | translate }} <b class="caret"></b>
+                    </a>
+                    <div class="dropdown-menu-right" ngbDropdownMenu>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('en')">
+                            {{ 'English' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('fr')">
+                            {{ 'French' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('ur')">
+                            {{ 'Urdu' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('es')">
+                            {{ 'Spanish' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('it')">
+                            {{ 'Italian' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('fa')">
+                            {{ 'Farsi' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('de')">
+                            {{ 'German' | translate }}
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" (click)="changeLang('zh-CHS')">
+                            {{ 'Simplified Chinese' | translate }}
+                        </a>
+                    </div>
+                </li> -->
+                <!--<li *ngIf="groups && selectedGroup">
+                    <span *ngFor="let group of groups">
+                        <!-- Handle branch node buttons here --
+                        <span *ngIf="group.children && group.children.length > 0" style="z-index:1031">
+                            <button mat-button [matMenuTriggerFor]="menu.childMenu" [disabled]="group.disabled">
+                                {{group.displayName}}
+                            </button>
+                            <app-menu-item #menu [items]="group.children"></app-menu-item>
+                        </span>
+                        <!-- Leaf node buttons here --
+                        <span *ngIf="!group.children || group.children.length === 0" style="z-index:1031">
+                            <button mat-button color="primary" (click)="group.click()">
+                                {{group.displayName}}
+                            </button>
+                        </span>
+                    </span>
+                </li> -->
+                <li class="nav-item dropdown" ngbDropdown>
+                    <a href="javascript:void(0)" class="nav-link" ngbDropdownToggle>
+                        <i class="fa fa-user"></i> {{username}} <b class="caret"></b>
+                    </a>
+                    <div class="dropdown-menu-right" ngbDropdownMenu>
+                        <a class="dropdown-item" [routerLink]="['/settings']" >
+                            <i class="fa fa-fw fa-cog"></i> {{ 'Settings' | translate }}
+                        </a>
+                        <a class="dropdown-item" [routerLink]="['/login']" (click)="onLoggedout()">
+                            <i class="fa fa-fw fa-power-off"></i> {{ 'Log Out' | translate }}
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    

@@ -1,0 +1,180 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div([@routerTransition])
+
+  .row
+    .col
+      .pull-left
+        app-page-header([heading]="'Test Definitions'", [icon]="'fa-edit'")
+      .pull-right
+        button(mat-raised-button, color="primary", (click)="create()") New
+  //-.card-mb-12
+    .pull-left
+      mat-form-field
+        input(matInput, name="filter", (keyup)="applyFilter($event.target.value)", placeholder="Filter")
+    .pull-right
+      button(mat-raised-button, color="primary", (click)="create()") New
+
+    div(style="width: 100%", [hidden]="!loading")
+      mat-spinner(style="margin: auto", color="primary")
+    //- 
+     table.mat-elevation-z8(mat-table, *ngIf="dataSource && dataSource.data && dataSource.data.length > 0", [dataSource]="dataSource", style="width: 100%", [hidden]="loading")
+    
+      ng-container(matColumnDef="lock")
+        th(mat-header-cell, *matHeaderCellDef) 
+        td(mat-cell, *matCellDef="let element", (click)="expand(element)")
+          div.mr-4
+            i.fa.fa-lock(*ngIf="element.disabled") 
+
+      ng-container(matColumnDef="name")
+        th(mat-header-cell, *matHeaderCellDef) Name
+        td(mat-cell, *matCellDef="let element", (dblclick)="navToDefinition(element._id)") {{ element.testName }}
+
+      ng-container(matColumnDef="description")
+        th(mat-header-cell, *matHeaderCellDef) Description
+        td(mat-cell, *matCellDef="let element", (dblclick)="navToDefinition(element._id)") {{ element.testDescription }}
+
+      ng-container(matColumnDef="id")
+        th(mat-header-cell, *matHeaderCellDef) Id
+        td(mat-cell, *matCellDef="let element", (dblclick)="navToDefinition(element._id)") {{ element._id }}
+
+      ng-container(matColumnDef="processDefinitionKey")
+        th(mat-header-cell, *matHeaderCellDef) Process Definition Key
+        td(mat-cell, *matCellDef="let element", (dblclick)="navToDefinition(element._id)") {{ element.processDefinitionKey }}
+
+      ng-container(matColumnDef="options")
+        th(mat-header-cell, *matHeaderCellDef) Options
+        td(mat-cell, *matCellDef="let element")
+          .dropdown(ngbDropdown, placement="bottom-right")
+            button(mat-mini-fab, color="primary", ngbDropdownToggle)
+              i.fa.fa-caret-down
+              //mat-icon more_vert
+            .dropdown-menu(ngbDropdownMenu)
+              a.dropdown-item(*ngIf="isDeployed(element) && !element.disabled", (click)='createInstance(element)')
+                i.fa.fa-fw.fa-plus(style="color: #005000")
+                span.pl-1 Create Instance
+              //- a.dropdown-item((click)='view(element)')
+              //-   i.fa.fa-fw.fa-eye(style="color: #ff9100")
+              //-   span.pl-1 View
+              a.dropdown-item(*ngIf="element.disabled", (click)='unlock(element)')
+                i.fa.fa-fw.far.fa-unlock(style="color: black")
+                span.pl-1 Unlock
+              a.dropdown-item(*ngIf="!element.disabled", (click)='lock(element)')
+                i.fa.fa-fw.far.fa-lock(style="color: black")
+                span.pl-1 Lock
+              a.dropdown-item(*ngIf="favorites.indexOf(element._id) < 0", (click)='favorite(element)')
+                i.fa.fa-fw.far.fa-star(style="color: yellow")
+                span.pl-1 Favorite
+              a.dropdown-item(*ngIf="favorites.indexOf(element._id) >= 0", (click)='unfavorite(element)')
+                i.fa.fa-fw.fas.fa-star(style="color: yellow")
+                span.pl-1 Unfavorite
+              a.dropdown-item((click)='edit(element)')
+                i.fa.fa-fw.fa-pencil(style="color: #0d47a1")
+                span.pl-1 Edit
+              a.dropdown-item([routerLink]="['/modeler']", [queryParams]="{testDefinitionId: element._id}")
+                i.fa.fa-fw.bpmn-icon-bpmn-io(style="color: green")
+                span.pl-1 Modeler
+              a.dropdown-item((click)='delete(element)')
+                i.fa.fa-fw.fa-remove(style="color: #dd2c00")
+                span.pl-1 Delete
+          //- button.mr-3(mat-mini-fab, matTooltip="View Workflow", color="accent", (click)='view(element)')
+          //-   i.fa.fa-eye
+          //- button.mr-3(mat-mini-fab, matTooltip="Edit", color="primary", (click)='edit(element)')
+          //-   i.fa.fa-pencil
+          //- button.text-white(mat-mini-fab, matTooltip="Delete", color='warn', (click)='delete(element)')
+          //-   i.fa.fa-remove
+
+      tr(mat-header-row, *matHeaderRowDef="displayedColumns")
+      tr(mat-row, *matRowDef="let row; columns: displayedColumns")
+
+    //-mat-paginator([length]="resultsLength", [pageSizeOptions]="[10, 25, 100]", [hidden]="loading")
+
+    
+  
+  .row.mt-2
+    .col
+
+      //- Create
+      button.mr-2.pull-right(color="primary", matTooltip="Create Test Instance", mat-icon-button, (click)="createInstance()", [disabled] = "((!selectedSingleRow) || (selectedLockedRows))")
+        mat-icon add
+      //- Lock
+      button.mr-4.pull-right(color="primary", matTooltip="Lock Test Definition", mat-icon-button, (click)="lockMultiple()", [disabled]="(!hasSelectedRows)", [hidden]="(!selectedUnlockedRows)")
+        mat-icon lock
+      //- Unlock
+      button.mr-2.pull-right(color="primary", matTooltip="Unlock Test Definition", mat-icon-button, (click)="unlockMultiple()", [disabled]="", [hidden] = "((!selectedLockedRows) || (!selectedRows))")
+        mat-icon lock_open
+
+      //- Edit
+      button.mr-2.pull-right(color="primary", matTooltip="Edit Test Definition", mat-icon-button, (click)="edit()", [disabled]="(!selectedSingleRow)") 
+        mat-icon edit
+      //- Delete
+      button.mr-2.pull-right(color="primary", matTooltip="Delete Test Definition", mat-icon-button, (click)="deleteMultiple()", [disabled]="!hasSelectedRows") 
+        mat-icon delete_forever
+      //- Modeler
+      button.mr-2.pull-right(mat-raised-button, color="primary", (click)="testDefinitionModeler()", [disabled]="(!selectedSingleRow)") Modeler
+
+    //-div(style="width: 100%", [hidden]="!loading")  **Took this out because it would load quicker
+      mat-spinner(style="margin: auto", color="primary")
+
+    //- div(style="width: 100%;height: 40px;")
+
+  .row  
+    .col
+      ag-grid-angular.ag-theme-material(
+        style="width:100%; height: 600px",
+        [rowData]="rowData",
+        [columnDefs]="columns",
+        rowSelection="multiple",
+        [rowMultiSelectWithClick]="true",
+        (rowSelected)="onRowSelected($event)",
+        (gridReady)="onGridReady($event)",
+        [enableCellChangeFlash]="true",
+        (cellDoubleClicked)="navToDefinition($event)",
+        [singleClickEdit]="true"
+      )
+
+
+
+
+    //.card-body
+      .row
+        div.col-6
+          input.form-control.bg-light.mb-1([(ngModel)]="search.test_head_id", type="text", placeholder="Search...")
+        div.col-6
+          button.bg-primary.mbtn.pull-right.text-white.mb-1(mat-raised-button, (click)='createTestHead()') Create VTH
+      table.table.table-striped([mfData]='data', #mf='mfDataTable', [mfRowsOnPage]='5')
+        thead
+          tr
+            th(style='width: 20%')
+              mfDefaultSorter(by='name') Name
+            th(style='width: 50%')
+              mfDefaultSorter(by='creator') Creator
+            th(style='width: 10%')
+              mfDefaultSorter(by='date') Date 
+            th(style='width: 20%') Options   
+        tbody
+          tr
+            td Ping Test Head
+            td Tiffany, Patrick 
+            td 7/21/18
+            td 
+              button.bg-primary.mbtn.text-white.mr-1(mat-mini-fab, aria-label='View', (click)='viewTestHead(null)') 
+                i.fa.fa-eye
+              button.bg-primary.mbtn.text-white.mr-1(mat-mini-fab, aria-label='Edit', (click)='editTestHead()')
+                i.fa.fa-pencil
+              button.mbtn.text-white(mat-mini-fab, aria-label='Remove', color='warn', (click)='deleteTestHead()')
+                i.fa.fa-remove

@@ -1,0 +1,714 @@
+openapi: 3.0.1
+info:
+  title: Open Test Framework API
+  description: A RESTful API used to communicate with the OTF test control unit.
+  contact:
+    name: OTF
+    url: https://localhost:32524
+  version: "1.0"
+tags:
+- name: Health Service
+  description: Query the availability of the API
+- name: Test Execution Service
+  description: Query the status and history of your test executions
+- name: Test Instance Service
+  description: Create, execute,and query test instances
+- name: Test Strategy Service
+  description: Deploy and delete test strategies to and from the test control unit.
+    (This documentation will only be available to the development team)
+paths:
+  /otf/api/health/v1:
+    get:
+      tags:
+      - Health Service
+      summary: Checks if the test control unit is available
+      operationId: getHealth_1
+      responses:
+        200:
+          description: The test control unit is available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtfApiResponse'
+  /otf/api/testExecution/v1/executionId/{executionId}:
+    get:
+      tags:
+      - Test Execution Service
+      operationId: getExecutionStatus_1
+      parameters:
+      - name: executionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /otf/api/testInstance/execute/v1/id/{testInstanceId}:
+    post:
+      tags:
+      - Test Instance Service
+      summary: Executes a test instance by it's unique identifier
+      operationId: execute_1
+      parameters:
+      - name: testInstanceId
+        in: path
+        description: A string representation of a BSON ObjectId
+        required: true
+        schema:
+          type: string
+          description: The UUID of the test instance
+          format: uuid
+        example: 12345678912345678912345f
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteTestInstanceRequest'
+      responses:
+        200:
+          description: A successful synchronously executed test returns a test execution
+            object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestExecutionResult'
+        201:
+          description: |-
+            A successful asynchronously executed test with asyncMode set to 'poll' returns an execution identifier
+            The identifier can be used as a parameter to the Test Execution Service to check the status of the executed test
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestExecutionResult'
+        401:
+          description: The mechanized identifier used with the request is prohibited
+            from accessing the resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtfApiResponse'
+  /otf/api/testInstance/v1/id/{id}:
+    get:
+      tags:
+      - Test Instance Service
+      operationId: findById_1
+      parameters:
+      - name: id
+        in: path
+        description: A string representation of a BSON ObjectId
+        required: true
+        schema:
+          type: string
+          description: The UUID of the test instance
+          format: uuid
+        example: 12345678912345678912345f
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /otf/api/testInstance/create/v1/testDefinitionId/{testDefinitionId}/version/{version}:
+    post:
+      tags:
+      - Test Instance Service
+      summary: Create a test instance using the specified version of the test definition
+      operationId: createByTestDefinitionIdAndVersion_1
+      parameters:
+      - name: testDefinitionId
+        in: path
+        description: A string representation of a BSON ObjectId
+        required: true
+        schema:
+          type: string
+          description: The UUID of the test definition.
+          format: uuid
+        example: 12345678912345678912345f
+      - name: version
+        in: path
+        description: The version of the test definition used to create the instance
+        required: true
+        schema:
+          type: string
+        example: 2
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      - name: execute
+        in: query
+        description: Execute the test instance after it is created
+        allowEmptyValue: true
+        schema:
+          type: boolean
+        example: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTestInstanceRequest'
+      responses:
+        201:
+          description: The created Test Instance object is returned when it is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestInstance'
+  /otf/api/testInstance/v1/testInstanceName/{testInstanceName}:
+    get:
+      tags:
+      - Test Instance Service
+      summary: Finds a test instance by it's name
+      operationId: findByTestInstanceName_1
+      parameters:
+      - name: testInstanceName
+        in: path
+        description: The name of the test instance to retrieve
+        required: true
+        schema:
+          type: string
+        example: myTestInstance
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      responses:
+        200:
+          description: A test instance object is returned when if it is found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestInstance'
+  /otf/api/testInstance/v1/processDefinitionKey/{processDefinitionKey}:
+    get:
+      tags:
+      - Test Instance Service
+      operationId: findByProcessDefKey_1
+      parameters:
+      - name: processDefinitionKey
+        in: path
+        description: The process definition key associated with the test definition
+        required: true
+        schema:
+          type: string
+        example: someUniqueProcessDefinitionKey
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /otf/api/testInstance/create/v1/testDefinitionId/{testDefinitionId}:
+    post:
+      tags:
+      - Test Instance Service
+      summary: Create a test instance using the latest version of the test definition
+      operationId: createByTestDefinitionId_1
+      parameters:
+      - name: testDefinitionId
+        in: path
+        description: A string representation of a BSON ObjectId
+        required: true
+        schema:
+          type: string
+          description: The UUID of the test definition
+          format: uuid
+        example: 12345678912345678912345f
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      - name: execute
+        in: query
+        description: Execute the test instance after it is created
+        allowEmptyValue: true
+        schema:
+          type: boolean
+        example: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTestInstanceRequest'
+      responses:
+        201:
+          description: The created Test Instance object is returned when it is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestInstance'
+  /otf/api/testInstance/v1/processDefinitionKey/{processDefinitionKey}/version/{version}:
+    get:
+      tags:
+      - Test Instance Service
+      operationId: findByProcessDefKeyAndVersion_1
+      parameters:
+      - name: processDefinitionKey
+        in: path
+        description: The process definition key associated with the test definition
+        required: true
+        schema:
+          type: string
+        example: someUniqueProcessDefinitionKey
+      - name: version
+        in: path
+        description: The version of the test definition used to create the instance
+        required: true
+        schema:
+          type: string
+        example: 2
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /otf/api/testInstance/create/v1/processDefinitionKey/{processDefinitionKey}/version/{version}:
+    post:
+      tags:
+      - Test Instance Service
+      summary: Create a test instance using the specified version of the test definition
+      operationId: createByProcessDefKeyAndVersion_1
+      parameters:
+      - name: processDefinitionKey
+        in: path
+        description: The process definition key associated with the test definition
+        required: true
+        schema:
+          type: string
+        example: someUniqueProcessDefinitionKey
+      - name: version
+        in: path
+        description: The version of the test definition used to create the instance
+        required: true
+        schema:
+          type: string
+        example: 2
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      - name: execute
+        in: query
+        description: Execute the test instance after it is created
+        allowEmptyValue: true
+        schema:
+          type: boolean
+        example: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTestInstanceRequest'
+      responses:
+        201:
+          description: The created Test Instance object is returned when it is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestInstance'
+  /otf/api/testInstance/create/v1/processDefinitionKey/{processDefinitionKey}:
+    post:
+      tags:
+      - Test Instance Service
+      summary: Create a test instance using the latest version of the test definition
+      operationId: createByProcessDefKey_1
+      parameters:
+      - name: processDefinitionKey
+        in: path
+        description: The process definition key associated with the test definition
+        required: true
+        schema:
+          type: string
+        example: someUniqueProcessDefinitionKey
+      - name: Authorization
+        in: header
+        description: Base64 encoded Application Authorization Framework credentials
+        required: true
+        schema:
+          type: string
+        example: Basic b3RmQGF0dC5jb206cGFzc3dvcmQxMjM=
+      - name: execute
+        in: query
+        description: Execute the test instance after it is created
+        allowEmptyValue: true
+        schema:
+          type: boolean
+        example: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTestInstanceRequest'
+      responses:
+        201:
+          description: The created Test Instance object is returned when it is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestInstance'
+  /otf/api/testStrategy/delete/v1/deploymentId/{deploymentId}:
+    delete:
+      tags:
+      - Test Strategy Service
+      operationId: deleteByDeploymentId_1
+      parameters:
+      - name: deploymentId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: authorization
+        in: header
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /otf/api/testStrategy/delete/v1/testDefinitionId/{testDefinitionId}:
+    delete:
+      tags:
+      - Test Strategy Service
+      operationId: deleteByTestDefinitionId_1
+      parameters:
+      - name: testDefinitionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: authorization
+        in: header
+        schema:
+          type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+  /otf/api/testStrategy/deploy/v1:
+    post:
+      tags:
+      - Test Strategy Service
+      operationId: deployTestStrategy_1
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                bpmn:
+                  type: object
+                resources:
+                  type: object
+                testDefinitionId:
+                  type: string
+                testDefinitionDeployerId:
+                  type: string
+                definitionId:
+                  type: string
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        date:
+          type: string
+          format: date-time
+        message:
+          type: string
+    JSONObject:
+      type: object
+    ObjectId:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int32
+        machineIdentifier:
+          type: integer
+          format: int32
+        processIdentifier:
+          type: integer
+          format: int32
+        counter:
+          type: integer
+          format: int32
+        time:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        timeSecond:
+          type: integer
+          format: int32
+    TestExecution:
+      type: object
+      properties:
+        get_id:
+          $ref: '#/components/schemas/ObjectId'
+        executionId:
+          type: string
+        testResult:
+          type: string
+        testDetails:
+          type: object
+          additionalProperties:
+            type: object
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        async:
+          type: boolean
+        asyncTopic:
+          type: string
+        asyncMode:
+          type: string
+        executor:
+          type: string
+        groupId:
+          $ref: '#/components/schemas/ObjectId'
+        testInstanceId:
+          $ref: '#/components/schemas/ObjectId'
+        testInstance:
+          type: object
+          additionalProperties:
+            type: object
+        testHeadResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestHeadResult'
+        testDetailsJSON:
+          type: string
+        testInstanceJSON:
+          type: string
+    TestExecutionResult:
+      type: object
+      properties:
+        testExecution:
+          $ref: '#/components/schemas/TestExecution'
+        executionId:
+          type: string
+        testCompleted:
+          type: boolean
+        testExists:
+          type: boolean
+    TestHeadResult:
+      type: object
+      properties:
+        testHeadId:
+          $ref: '#/components/schemas/ObjectId'
+        testHeadName:
+          type: string
+        bpmnVthTaskId:
+          type: string
+        testHeadResponse:
+          type: object
+          additionalProperties:
+            type: object
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        testHeadResponseJSON:
+          $ref: '#/components/schemas/JSONObject'
+    ExecuteTestInstanceRequest:
+      type: object
+      properties:
+        async:
+          type: boolean
+          writeOnly: true
+        asyncTopic:
+          title: Execute the test synchronously or asynchronously..
+          type: string
+          description: Ignored unless async is true, and asyncMode is DMaaP.
+          example: MyDMaaPTopic.
+        asyncMode:
+          title: Set the asynchronous execution mode.
+          type: string
+          description: Ignored unless async is true. The poll mode will return an
+            executionId that can be used to query the result of the executed test.
+            DMaaP is currently unsupported.
+          example: POLL
+          enum:
+          - POLL
+          - DMAAP
+        testData:
+          title: Use an existing test instance with different global test data.
+          type: object
+          description: Overrides (not overwrites) the testData field for the requested
+            execution. The overridden data will be preserved in the test execution
+            result.
+          example:
+            globalVar1: I'm available to your workflow!
+            globalVar2:
+              me: too
+        vthInput:
+          title: Use an existing test instance with different inputs to your VTHs.
+          type: object
+          description: Overrides (not overwrites) the vthInput field for the requested
+            execution. The overridden data will be preserved in the test execution
+            result.
+          example:
+            ServiceTask_123:
+              vthArg1: An argument your VTH expects.
+              vthArg2: {}
+            ServiceTask_456:
+              vthArg1: An argument your VTH expects.
+      description: The model2 for a test instance execution request.
+    TestInstance:
+      type: object
+      properties:
+        get_id:
+          $ref: '#/components/schemas/ObjectId'
+        testInstanceName:
+          type: string
+        testInstanceDescription:
+          type: string
+        groupId:
+          $ref: '#/components/schemas/ObjectId'
+        testDefinitionId:
+          $ref: '#/components/schemas/ObjectId'
+        processDefinitionId:
+          type: string
+        useLatestTestDefinition:
+          type: boolean
+        testData:
+          type: object
+          additionalProperties:
+            type: object
+        vthInput:
+          type: object
+          additionalProperties:
+            type: object
+        internalTestData:
+          type: object
+          additionalProperties:
+            type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          $ref: '#/components/schemas/ObjectId'
+        updatedBy:
+          $ref: '#/components/schemas/ObjectId'
+        vthInputJSON:
+          $ref: '#/components/schemas/JSONObject'
+        testDataJSON:
+          $ref: '#/components/schemas/JSONObject'
+        internalTestDataJSON:
+          $ref: '#/components/schemas/JSONObject'
+    CreateTestInstanceRequest:
+      required:
+      - testData
+      - testInstanceDescription
+      - testInstanceName
+      type: object
+      properties:
+        testInstanceName:
+          title: Name the test instance
+          type: string
+          description: The name must be unique among all test instances belonging
+            to the same test definition.
+          example: MyTestInstance
+        testInstanceDescription:
+          title: Describe the test instance being created
+          type: string
+          description: Use this field to describe the functionality of the test instance
+          example: This test instance does absolutely nothing!
+        testData:
+          title: Set global variables
+          type: object
+          description: |-
+            This field has read and write access by any task within the workflow.
+            See the example for more information
+          example:
+            globalVar1: I'm available to your workflow!
+            globalVar2:
+              me: too
+        vthInput:
+          title: Set virtual test head data
+          type: object
+          description: |-
+            This field determines the data each VTH at the designated ServiceTask will receive.
+            See the example for more information
+          example:
+            ServiceTask_123:
+              vthArg1: An argument your VTH expects.
+              vthArg2: {}
+            ServiceTask_456:
+              vthArg1: An argument your VTH expects.
+        async:
+          type: boolean
+        asyncTopic:
+          type: string
+        asyncMode:
+          type: string
+      description: The model2 for a test instance creation request.

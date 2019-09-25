@@ -1,0 +1,64 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+mat-card.mb-3
+    mat-card-header 
+        mat-card-title 
+            h4(*ngIf="testDefinition?.testName") {{ testDefinition.testName }} 
+        mat-card-subtitle(style="margin-bottom: 0px")
+            div(*ngIf="testDefinition?.testDescription") {{testDefinition.testDescription }}
+    mat-card-content
+        .row(*ngIf="testDefinition")
+            .col-sm
+                mat-form-field(*ngIf="testDefinition?.processDefinitionKey")
+                    input(matInput, placeholder="Process Definition Key", type="text", [value]="testDefinition.processDefinitionKey", disabled, name="defKey")
+            .col-sm
+                mat-form-field(*ngIf="testDefinition?.disabled != undefined") 
+                    input(matInput, placeholder="Is Disabled", type="text", [value]="testDefinition.disabled", disabled, name="disabled")
+            .col-sm
+                mat-form-field(*ngIf="testDefinition") 
+                    input(matInput, placeholder="Number Of Versions", type="text", [value]="numOfVersions", disabled, name="numOfVersions")
+            .col-sm
+                mat-form-field(*ngIf="testDefinition?.groupId")
+                    input(matInput, placeholder="Group Id", type="text", [value]="testDefinition.groupId", disabled, name="group")
+            //- .col-sm
+            //-     mat-form-field(style="width:50px",*ngIf="testDefinition?.isPublic")
+            //-         input(matInput, placeholder="Is Public", type="text", [value]="testDefinition.isPublic", disabled, name="public")
+
+div(style="position: relative")
+  .row
+    .col-12
+      .pull-left
+        mat-form-field(style="width:110px")
+          input(matInput, [matDatepicker]="fromPicker", placeholder="From Date", [(ngModel)]="stats.filters.startDate")
+          mat-datepicker-toggle(matSuffix, [for]="fromPicker")
+          mat-datepicker(#fromPicker)
+        mat-form-field.ml-2(style="width:110px")
+          input(matInput, [matDatepicker]="toPicker", placeholder="To Date", [(ngModel)]="stats.filters.endDate")
+          mat-datepicker-toggle(matSuffix, [for]="toPicker")
+          mat-datepicker(#toPicker)
+        button.ml-2(mat-icon-button, (click)="getData()") 
+          mat-icon arrow_forward
+          
+      .pull-right
+        mat-form-field
+          input(matInput, [ngModel]="stats.executionList?.length", placeholder="Total Executions", disabled)
+
+  .row
+    .col-12
+      mat-card
+        mat-card-content
+          app-line-chart(height="201px")

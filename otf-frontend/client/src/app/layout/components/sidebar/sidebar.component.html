@@ -1,0 +1,160 @@
+<!-- Copyright (c) 2019 AT&T Intellectual Property.                            #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+#############################################################################-->
+
+
+<nav class="sidebar" [ngClass]="{sidebarPushRight: isActive}">
+    <div class="list-group">
+        <a routerLink="/dashboard" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-dashboard"></i>&nbsp;{{ 'Dashboard' | translate }}
+        </a>
+
+        <a [routerLink]="['/test-definitions']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-object-group"></i>&nbsp;{{ 'Test Definitions' | translate }}
+        </a> 
+        <!--<div class="nested-menu">
+            <a class="list-group-item" (click)="addExpandClass('definition')">
+                <span><i class="fa fa-fw fa-object-group"></i>&nbsp; {{ 'Test Definitions' | translate }}</span>
+            </a>
+            <li class="nested" [class.expand]="showMenu === 'definition'">
+                <ul class="submenu">
+                    <li>
+                        <a [routerLink]="['/test-definitions']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-list-ul"></i>&nbsp;{{ 'Collection' | translate }}
+                        </a>
+                    </li>
+                    <li>
+                        <a [routerLink]="['/modeler']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa bpmn-icon-bpmn-io"></i>&nbsp;{{ 'BPMN Modeler' | translate }}
+                        </a>
+                    </li>
+                </ul>
+        </div> -->
+        <a [routerLink]="['/test-instances']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-clone"></i>&nbsp;{{ 'Test Instances' | translate }}
+        </a>
+        <!--<a [routerLink]="['/test-executions']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-bolt"></i>&nbsp;{{ 'Test Executions' | translate }}
+        </a>
+        <a routerLink="/onboarding" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-user"></i>&nbsp;{{ 'Onboarding' | translate }}
+        </a>-->
+        <!--<div class="nested-menu">
+            <a class="list-group-item" (click)="addExpandClass('pages1')">
+                <span><i class="fa fa-fw fa-user"></i>&nbsp;{{ 'Onboarding' | translate }}</span>
+            </a>
+            <li class="nested" [class.expand]="showMenu === 'pages1'">
+                <ul class="submenu">
+                    <li>
+                        <a [routerLink]="['/onboarding/test-head']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-gears"></i>&nbsp;{{ 'Onboard Test Head' | translate }}
+                        </a>
+                    </li>
+                    <li>
+                        <a [routerLink]="['/onboarding/test-definition']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-object-group"></i>&nbsp;{{ 'Onboard Test Definition' | translate }}
+                        </a>
+                    </li>
+                    <li>
+                        <a [routerLink]="['/onboarding/test-instances']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-clone"></i>&nbsp;{{ 'Create Test Instance' | translate }}
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </div> -->
+        <div class="nested-menu">
+            <a class="list-group-item" (click)="addExpandClass('pages2')">
+                <span><i class="fa fa-folder"></i>&nbsp; {{ 'Resources' | translate }}</span>
+            </a>
+            <li class="nested" [class.expand]="showMenu === 'pages2'">
+                <ul class="submenu">
+                    <li>
+                        <a [routerLink]="['/test-heads']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-gears"></i>&nbsp;{{ 'Virtual Test Heads' | translate }}
+                        </a>
+                    </li>
+                    <!--<li>
+                        <a [routerLink]="['/test-definitions']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-object-group"></i>&nbsp;{{ 'Test Definitions' | translate }}
+                        </a>
+                    </li>
+                    <li>
+                        <a [routerLink]="['/test-instances']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-clone"></i>&nbsp;{{ 'Test Instances' | translate }}
+                        </a>
+                    </li>
+                    <li>
+                        <a [routerLink]="['/test-executions']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-bolt"></i>&nbsp;{{ 'Test Executions' | translate }}
+                        </a>
+                    </li>-->
+                </ul>
+        </div>
+        <!--<a routerLink="/scheduling" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-calendar"></i>&nbsp;{{ 'Scheduling' | translate }}
+        </a>-->
+        <a [routerLink]="['/modeler']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa bpmn-icon-bpmn-io"></i>&nbsp; Test Designer <small style="color: green">beta</small>
+        </a>
+        <a *ngIf="canManageGroup" [routerLink]="['/manage-group']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-group"></i>&nbsp;{{ 'Manage Group' | translate }}
+        </a>
+        <a [routerLink]="['/feedback']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-comment-o"></i>&nbsp;{{ 'Feedback' | translate }}
+        </a>
+     
+
+        <div *ngIf="checkIsAdmin()" class="nested-menu">
+            <a class="list-group-item" (click)="addExpandClass('admin')">
+                <span><i class="fa fa-fw fa-shield"></i>&nbsp; {{ 'Admin' | translate }}</span>
+            </a>
+            <li class="nested" [class.expand]="showMenu === 'admin'">
+                <ul class="submenu">
+                    <li>
+                        <a [routerLink]="['/user-management']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-user"></i>&nbsp;{{ 'User Management' | translate }}
+                        </a>
+                    </li>
+                </ul>
+        </div>
+        <!--<div class="nested-menu">
+            <a class="list-group-item" (click)="addExpandClass('pages3')">
+                <span><i class="fa fa-fw fa-users"></i>&nbsp; {{ 'Manage Group' | translate }}</span>
+            </a>
+            <li class="nested" [class.expand]="showMenu === 'pages3'">
+                <ul class="submenu">
+                    <li>
+                        <a [routerLink]="['/manageGroupUsers']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-user"></i>&nbsp;{{ 'User Management' | translate }}
+                        </a>
+                    </li>
+                    <li>
+                        <a [routerLink]="['/manageGroup']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+                            <i class="fa fa-fw fa-object-group"></i>&nbsp;{{ 'Manage Group' | translate }}
+                        </a>
+                    </li>
+                    
+                </ul>
+        </div> -->
+
+        <a style="position:absolute; bottom: 80px; width: 100%" class="list-group-item" (click)="setHealthStatus()">
+            TCU Engine <small *ngIf="tcuengine" style="color:green">Running</small><small *ngIf="!tcuengine" style="color: red">Down</small>
+        </a>
+        <a style="position:absolute; bottom: 40px; width: 100%" class="list-group-item" (click)="setHealthStatus()">
+            TCU API <small *ngIf="tcuapi" style="color:green">Running</small><small *ngIf="!tcuapi" style="color: red">Down</small>
+        </a>
+        <a style="position:absolute; bottom: 0px; width:100%" class="list-group-item"> {{version}} </a>
+    </div>
+</nav>

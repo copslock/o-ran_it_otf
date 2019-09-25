@@ -1,0 +1,72 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+h2.mb-1(mat-dialog-title) Schedule {{selectedTestInstance ? selectedTestInstance.testInstanceName : ''}}
+
+mat-dialog-content(*ngIf="selectedTestInstance")
+  .row
+    .col-sm-6
+      h5 Create Schedule
+      .row
+        .col-sm-6
+          mat-form-field
+            input(matInput, [matDatepicker]="schedulePicker", [(ngModel)]='startDate', placeholder="Select Start Date", required)
+            mat-datepicker-toggle(matSuffix, [for]="schedulePicker")
+            mat-datepicker(#schedulePicker)
+        .col-sm-6
+          mat-form-field
+            input(matInput, [(ngModel)]="timeToRun", [ngxTimepicker]="picker", placeholder="Select Time", required)
+            ngx-material-timepicker(#picker)
+
+      .row.mb-2
+        .col-12
+          mat-slide-toggle(color="primary", [(ngModel)]="frequency") Add Frequency
+
+      .row(*ngIf="frequency").mb-2
+        .col-sm-12
+          mat-form-field.mr-2
+            input(matInput, type="number",  [(ngModel)]='numUnit', placeholder='Execution Interval', required)
+          mat-form-field
+            mat-select(placeholder='Time Unit', [(ngModel)]='timeUnit', required)
+              mat-option([value]=60) min(s)
+              mat-option([value]=3600) hour(s)
+              mat-option([value]=86400) day(s)
+        .col-sm-6
+          mat-form-field
+            input(matInput, [matDatepicker]="schedulePicker2",  [(ngModel)]='endDate', placeholder="Select a End Date (Optional)")
+            mat-datepicker-toggle(matSuffix, [for]="schedulePicker2")
+            mat-datepicker(#schedulePicker2)
+      
+      .row
+        .col-12
+          button(mat-raised-button, color="primary", (click)='createSchedule()') Create Schedule
+
+    .col-sm-6
+      h5 Scheduled Runs
+      .row(*ngIf="scheduledJobs")
+        .col-12
+          .group-list
+            .group-list-item(*ngFor="let job of scheduledJobs") 
+              a((click)="deleteJob(job)") 
+                i.fa.fa-times 
+              |  {{ job.data.testSchedule._testInstanceStartDate }} {{job.data.testSchedule._testInstanceEndDate ? 'to ' + job.data.testSchedule._testInstanceEndDate : '' }} {{ job.data.testSchedule._testInstanceExecFreqInSeconds ? 'every ' + job.data.testSchedule._testInstanceExecFreqInSeconds + ' sec' : '' }}
+            .group-list-item(*ngIf="!loadingJobs && scheduledJobs.length == 0", style="text-align:center") Nothing is scheduled
+            .group-list-item(*ngIf="loadingJobs")
+              mat-spinner(style="margin:auto")
+mat-dialog-actions.pull-right
+  button.pull-right(mat-button, mat-dialog-close) Close
+    // The mat-dialog-close directive optionally accepts a value as a result for the dialog.
+    

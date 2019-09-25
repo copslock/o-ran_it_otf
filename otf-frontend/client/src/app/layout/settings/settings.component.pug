@@ -1,0 +1,42 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div([@routerTransition])
+    h2 Settings
+    hr
+
+h4(style="padding-top:1em;") Default Group Configuration
+.row
+    .col-sm-5
+        label Enable default group setting? 
+.row
+    .col-sm-5
+        mat-radio-group
+            mat-radio-button(value='enable', style="padding-right:5em;", [checked]="defaultGroupEnabled", (click)="enableDefaultGroup()") Enable
+            mat-radio-button(value='disable', [checked]="!defaultGroupEnabled", (click)="disableDefaultGroup()") Disable
+.row
+    .col-sm-5
+        mat-form-field
+            mat-label(style="color:black") {{ defaultGroup?.groupName }}
+            mat-select([disabled]='!defaultGroupEnabled')
+                mat-option(*ngFor="let group of eligibleGroups", (click)='changDefaultGroup(group)') {{group?.groupName}}
+.row
+    .col-sm-5
+        // button for submitting the information in the form
+        button(mat-raised-button='', color='primary', class='pull-right', (click)='update()') Save
+
+hr
+        

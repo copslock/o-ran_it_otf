@@ -1,0 +1,169 @@
+#!/usr/bin/env groovy
+
+properties([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [
+        [$class: 'hudson.model.StringParameterDefinition', name: 'PHASE', defaultValue: "BUILD"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'ENV', defaultValue: "dev"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'MECHID', defaultValue: "username"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'KUBE_CONFIG', defaultValue: "kubeConfig-dev"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'OTF_MONGO_DB', defaultValue: "otf_mongo_dev_db"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'OTF_CAMUNDA_DB', defaultValue: "otf_camunda_dev_db"],
+        [$class: 'hudson.model.StringParameterDefinition', name: 'TILLER_NAMESPACE', defaultValue: "org-oran-otf"]
+        
+]]])
+
+echo "Build branch: ${env.BRANCH_NAME}"
+
+node("docker") {
+    stage 'Checkout'
+    checkout scm
+    PHASES = PHASE.tokenize('_')
+    echo "PHASES : " + PHASES
+    pom = readMavenPom file: 'pom.xml'
+    ARTIFACT_ID = pom.artifactId
+    VERSION = pom.version
+    LABEL_VERSION = pom.version.replaceAll("\\.", "-")
+    echo "LabelVerion: " + LABEL_VERSION
+    NAMESPACE = pom.groupId
+    echo "Tiller Namespace: " + TILLER_NAMESPACE
+    DOCKER_REGISTRY = pom.properties['docker.registry']
+
+
+
+	if( ENV.equalsIgnoreCase("dev") ){
+	    IMAGE_NAME = pom.properties['docker.registry'] + "/" + NAMESPACE  + "/" + ARTIFACT_ID + ":" + VERSION
+	
+	}
+	if( ENV.equalsIgnoreCase("prod") || ENV.equalsIgnoreCase("prod-dr")){
+	    IMAGE_NAME = pom.properties['docker.registry'] + "/" + NAMESPACE + ".prod" + "/" + ARTIFACT_ID + ":" + VERSION
+	
+	}    
+    if( ENV.equalsIgnoreCase("st") ){
+        IMAGE_NAME = pom.properties['docker.registry'] + "/" + NAMESPACE + ".st" + "/" + ARTIFACT_ID + ":" + VERSION
+    
+    } 
+	
+	echo "Artifact: " + IMAGE_NAME
+
+    withEnv(["PATH=${env.PATH}:${tool 'mvn352'}/bin:${tool 'jdk180'}/bin:${env.WORKSPACE}/linux-amd64", "JAVA_HOME=${tool 'jdk180'}", "MAVEN_HOME=${tool 'mvn352'}", "HELM_HOME=${env.WORKSPACE}"]) {
+
+        echo "JAVA_HOME=${env.JAVA_HOME}"
+        echo "MAVEN_HOME=${env.MAVEN_HOME}"
+        echo "PATH=${env.PATH}"
+        echo "HELM_HOME=${env.HELM_HOME}"
+
+        wrap([$class: 'ConfigFileBuildWrapper', managedFiles: [
+                [fileId: 'maven-settings.xml', variable: 'MAVEN_SETTINGS']
+        ]]) {
+
+
+            if (PHASES.contains("BUILD")) {
+                stage 'Compile'
+                sh 'mvn -s $MAVEN_SETTINGS clean compile'
+
+                //stage 'Unit Test'
+                sh 'mvn -s $MAVEN_SETTINGS test -DskipTests'
+
+                stage 'Package'
+                sh 'mvn -s $MAVEN_SETTINGS package -DskipTests'
+//                sh 'mvn -DskipTests -Dmaven.test.skip=true -s $MAVEN_SETTINGS package'
+
+//                stage 'Verify'
+                sh 'mvn -s $MAVEN_SETTINGS verify -DskipTests'
+
+                stage 'Publish Artifact'
+
+                withCredentials([usernamePassword(credentialsId: MECHID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+
+                    echo "Artifact: " + IMAGE_NAME
+
+                    sh """
+						docker login $DOCKER_REGISTRY --username $USERNAME --password $PASSWORD
+						docker build -t $IMAGE_NAME -f target/Dockerfile target
+						docker push $IMAGE_NAME
+					"""
+                }
+
+            }
+            if (PHASES.contains("DEPLOY") || PHASES.contains("UNDEPLOY")) {
+
+                stage 'Init Helm'
+
+                //check if helm exists if not install
+                if (fileExists('linux-amd64/helm')) {
+                    sh """
+						echo "helm is already installed"
+					"""
+                } else {
+                    //download helm
+                    sh """
+						echo "installing helm"
+						wget  https://storage.googleapis.com/kubernetes-helm/helm-v2.8.2-linux-amd64.tar.gz
+						tar -xf helm-v2.8.2-linux-amd64.tar.gz
+						rm helm-v2.8.2-linux-amd64.tar.gz
+					"""
+                }
+
+                withCredentials([file(credentialsId: KUBE_CONFIG, variable: 'KUBECONFIG')]) {
+
+                    dir('helm') {
+                        //check if charts are valid, and then perform dry run, if successful then upgrade/install charts
+
+                        if (PHASES.contains("UNDEPLOY")) {
+                            stage 'Undeploy'
+
+                            sh """
+      							helm delete --tiller-namespace=$TILLER_NAMESPACE --purge $ARTIFACT_ID
+      						"""
+                        }
+
+                        //NOTE Double quotes are used below to access groovy variables like artifact_id and tiller_namespace
+                        if (PHASES.contains("DEPLOY")) {
+                            stage 'Deploy'
+                            withCredentials([
+                                    usernamePassword(credentialsId: OTF_MONGO_DB, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD'),
+                            ]) {
+                                sh """										
+								    echo "Validate Yaml"
+                                    helm lint $ARTIFACT_ID
+
+                                    echo "View Helm Templates"
+                                    helm template $ARTIFACT_ID \
+                                    	--set appName=$ARTIFACT_ID \
+                                    	--set version=$VERSION \
+                                    	--set image=$IMAGE_NAME\
+                                    	--set env=$ENV \
+                                    	--set otf.mongo.username=$USERNAME \
+                                    	--set otf.mongo.password=$PASSWORD \
+                                    	--set namespace=$TILLER_NAMESPACE
+                                    	
+
+                                    echo "Perform Dry Run Of Install"
+                                    helm upgrade --tiller-namespace=$TILLER_NAMESPACE --install --dry-run $ARTIFACT_ID $ARTIFACT_ID \
+                                    	--set appName=$ARTIFACT_ID \
+                                    	--set version=$VERSION \
+                                    	--set image=$IMAGE_NAME\
+                                    	--set env=$ENV \
+                                    	--set otf.mongo.username=$USERNAME \
+                                    	--set otf.mongo.password=$PASSWORD \
+                                    	--set namespace=$TILLER_NAMESPACE
+
+                                    echo "Helm Install/Upgrade"
+                                    helm upgrade --tiller-namespace=$TILLER_NAMESPACE --install $ARTIFACT_ID $ARTIFACT_ID \
+                                    	--set appName=$ARTIFACT_ID \
+                                    	--set version=$VERSION \
+                                    	--set image=$IMAGE_NAME\
+                                    	--set env=$ENV \
+                                    	--set otf.mongo.username=$USERNAME \
+                                    	--set otf.mongo.password=$PASSWORD \
+                                    	--set namespace=$TILLER_NAMESPACE
+                                    
+								"""
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+}

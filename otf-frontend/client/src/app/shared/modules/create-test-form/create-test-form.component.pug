@@ -1,0 +1,167 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+form(#testDefinitionForm="ngForm")
+  .row.mb-3
+    .col-sm-6(style="justify-content: flex-end;flex-direction: column;display: flex")
+
+      //- Diagram
+      .row(style="height: 100%")
+        //- placeholder
+        .col-12(*ngIf="!ptd.currentInstance.bpmnXml", style="text-align:center; opacity: .4")
+          i.fa.fa-5x.fa-object-group
+        //- diagram
+        .col-12(#canvas, [hidden]="!ptd.currentInstance.bpmnXml", style="position: relative; cursor: pointer", (click)="enlargeBpmn()")
+          button(mat-icon-button, color="primary", style="position: absolute; top: 0px; right: 0px; z-index: 100")
+            mat-icon zoom_in
+        
+
+      //- Upload and version
+      .row
+        .col-sm-6(style="text-align:center")
+          input(id="file", #file, type="file", name="file", ng2FileSelect, [uploader]="bpmnUploader", style="display:none", [hidden]="!ptd.currentInstance.isDeployed", (change)="validateFile()", required)
+          
+          //- when creating new
+          button(mat-raised-button, color="accent", *ngIf="!ptd.currentInstance.isDeployed && !ptd.currentInstance.bpmnXml && isNew", [hidden]="isUploading", (click)="isClicked = true", onclick="file.click();")
+            | Upload Workflow
+          button(mat-raised-button, color="primary", *ngIf="!ptd.currentInstance.isDeployed && ptd.currentInstance.bpmnXml", [hidden]="isUploading", onclick="file.click();")
+            | Change Workflow
+
+          //- when editing
+          //- button(mat-raised-button, color="primary", *ngIf="!isNew && ptd.currentInstance.isDeployed", [hidden]="isUploading", (click)="newVersion(this.ptd.processDefinitionKey)", onclick="file.click();")
+          //-   | New Version
+          h4(*ngIf="ptd.currentInstance.isDeployed") Deployed
+          
+          mat-spinner(style="margin:auto", [diameter]="30", [hidden]="!isUploading")
+
+        .col-sm-6
+          mat-form-field(*ngIf="ptd.processDefinitionKey != null")
+            input(matInput, placeholder="Process Definition Key", name="processDefinitionKey", maxlength="22", [disabled]="hasBeenSaved", (keyup)="checkProcessDefinitionKey()", [(ngModel)]="ptd.processDefinitionKey", required)
+            mat-spinner(matSuffix, *ngIf="pStatus == 'loading'", [diameter]="19")
+            mat-icon(matSuffix, *ngIf="pStatus == 'unique'", style="color: green") check
+            mat-icon(matSuffix, *ngIf="pStatus == 'notUnique'", style="color: red") error_outline
+
+    .col-sm-6
+      mat-form-field(style="width:100%")
+        input(matInput, type="text", placeholder="Name", name="name", [disabled]="(existingTd && !hasBeenSaved) || !ptd.currentInstance.bpmnXml", [(ngModel)]="ptd.testName", required)
+        mat-error Required
+      mat-form-field(style="width:100%")
+        input(matInput, type="text", placeholder="Description", name="description", [disabled]="(existingTd && !hasBeenSaved) || !ptd.currentInstance.bpmnXml", [(ngModel)]="ptd.testDescription", required)
+        mat-error Required
+      //- mat-form-field(style="width:100%")
+      //-   mat-select((selectionChange)="markAsDirty()", name="ns", [disabled]="(existingTd && !hasBeenSaved) || !ptd.currentInstance.bpmnXml", placeholder="Group", [(value)]="ptd.groupId", required)
+      //-     mat-option(*ngFor="let group of groups", value="{{group._id}}") {{ group.groupName }}
+      //-   mat-error Required
+      mat-form-field(style="width:100%")
+        input(matInput, type="text", *ngIf="!hasBeenSaved", placeholder="Version", name="version", [(ngModel)]="ptd.currentInstance.version", (keyup)="checkVersionUnique()", required)
+        mat-select((selectionChange)="switchVersion(ptd.currentVersionName)", placeholder="Version", name="selectedVersion", *ngIf="hasBeenSaved", [(value)]="ptd.currentVersionName", required)
+          mat-option(*ngFor="let instance of ptd.bpmnInstances.slice().reverse()", value="{{instance.version}}") {{ instance.version }}
+        mat-error Required
+        button(mat-button, matSuffix, color="primary", *ngIf="hasBeenSaved", (click)="newVersion(this.ptd.processDefinitionKey)", onclick="file.click();") New
+
+      button(mat-button, (click)="viewer.download()", color="primary")
+        mat-icon cloud_download
+        span.ml-2 Download
+        
+      
+  .row
+    .col-12(*ngIf="ptd.currentInstance")
+      mat-accordion
+        mat-expansion-panel([expanded]="ptd.currentInstance.dataTestHeads.length > 0")
+          mat-expansion-panel-header
+            mat-panel-title Test Heads
+            mat-panel-description(*ngIf="ptd.currentInstance.dataTestHeads") {{ ptd.currentInstance.dataTestHeads.length > 0? ptd.currentInstance.dataTestHeads.length : '' }}
+          .ps(style="position: relative; max-height: 105px", [perfectScrollbar])
+            div(style="white-space: nowrap")
+              .mr-4.text-center(*ngFor=("let task of ptd.currentInstance.dataTestHeads; index as i; trackBy: trackByFn"), style="display:inline-block")
+                .text-muted {{task.bpmnVthTaskId}}
+                button(color="accent", mat-fab, (click)="selectTestHead(i)")
+                  i.fa.fw.fa-gears.fa-2x(style="color:white")
+                p.text-muted {{ (task.testHead && task.testHead.testHeadName) ? task.testHead.testHeadName : '' }}
+      mat-expansion-panel([expanded]="true")
+        mat-expansion-panel-header
+          mat-panel-title Resources
+          mat-panel-description A single .zip file with scripts
+        input(type="file", #scripts, id="scripts", name="scripts", hidden,  (change)="markAsDirty()", ng2FileSelect, [uploader]="uploader", accept="application/zip")
+        .row(*ngIf="ptd.currentInstance.resourceFileId")
+          .col-12
+            mat-list
+              mat-list-item
+                mat-icon(mat-list-icon) insert_drive_file
+                h4(mat-line) {{ptd.currentInstance.resourceFileName }}
+        .row(*ngIf="!ptd.currentInstance.isDeployed")
+          .col-md-3
+            //- .mb-2 TESTING GIT TRACKING
+            //-   | Multiple Files 
+            //-   mat-slide-toggle(color="primary", name="isZip", [(ngModel)]="isZip", (change)="uploader.clearQueue()")
+            //-   |  .zip
+            //- div 
+            //-   input(*ngIf="!isZip", type="file", name="scripts", ng2FileSelect, [uploader]="uploader", multiple)
+            
+            button(mat-raised-button, *ngIf="isZip && !ptd.currentInstance.resourceFileId", onclick="scripts.click()", color="primary") Choose File
+            button(mat-raised-button, *ngIf="isZip && ptd.currentInstance.resourceFileId", onclick="scripts.click()", color="primary") Replace File
+          .col-md-8.ml-2
+            div(*ngIf="uploader.queue.length > 0")
+              label File:
+              ul.list-group(style="position:relative")
+                li.list-group-item(*ngFor="let item of uploader.queue")
+                  | {{ item?.file?.name }}
+                  div.upload-progress([ngStyle]="{'width': item.progress + '%'}")
+              //- button.pull-right(mat-button, (click)="upload()") Upload All
+              label(*ngIf="ptd.currentInstance.resourceFileId && uploader.queue.length > 0 && !saved") This will replace the previous resouce file
+              button.pull-right(mat-button, color="primary", (click)="clearQueue()") Remove All
+        .row(*ngIf="ptd.currentInstance.isDeployed")
+          .col-12(*ngIf="!ptd.currentInstance.resourceFileId")
+            | No resources were deployed with this version
+            
+
+    .col-12(*ngIf="ptd.currentInstance.testDataTemplate != {}")
+      h5.text-muted.mt-4 testInputTemplate.yaml
+      div(style="border: 1px solid lightgrey; font-size: 16px !important")
+        codemirror([config]="codeConfig", [(ngModel)]='ptd.currentInstance.testDataTemplate', name="testConfig")
+
+  .row(style="height:30px")
+  .row.form-buttons
+    .col-12.mt-3
+      .pull-left
+        .mr-3(mat-button, *ngIf="hasBeenSaved && saved && !testDefinitionForm.dirty") saved
+          mat-icon(style="color:green") check
+      .pull-right
+        //save
+        button.mr-3(mat-raised-button, *ngIf="!hasBeenSaved && !inProgress", color="primary", [disabled]="!testDefinitionForm.form.valid || !ptd.currentInstance.bpmnXml || !successUpload || pStatus == 'notUnique'", (click)="save()") Save
+
+        //update
+        button.mr-3(mat-raised-button, *ngIf="hasBeenSaved && !inProgress", color="primary", [disabled]="!testDefinitionForm.form.valid || !ptd.currentInstance.bpmnXml  || !testDefinitionForm.dirty || !successUpload", (click)="update()") Update
+        
+        //save and deploy
+        button.mr-3(mat-raised-button, color="accent",  [disabled]="!testDefinitionForm.form.valid || !ptd.currentInstance.bpmnXml || !successUpload || pStatus == 'notUnique'", *ngIf="!ptd.currentInstance.isDeployed && !hasBeenSaved && !saved && !inProgress", (click)="saveDeploy()") Save & Deploy
+        
+        //update and deploy
+        button.mr-3(mat-raised-button, color="accent", [disabled]="!testDefinitionForm.form.valid || !ptd.currentInstance.bpmnXml || !successUpload", *ngIf="!ptd.currentInstance.isDeployed && hasBeenSaved && testDefinitionForm.dirty && !inProgress", (click)="updateDeploy()") Update & Deploy
+
+        //deploy
+        button.mr-3(mat-raised-button, color="accent", [disabled]="!testDefinitionForm.form.valid || !ptd.currentInstance.bpmnXml || !successUpload", *ngIf="!ptd.currentInstance.isDeployed && hasBeenSaved && testDefinitionForm.pristine && !inProgress", (click)="deploy()") Deploy
+      
+        //delete
+        button.mr-3(mat-raised-button, color="warn", *ngIf="hasBeenSaved && !inProgress", (click)="deleteVersion()") Delete Version
+
+        //- button((click)="print()") print
+        
+        //In Progress
+        button.mr-3(mat-raised-button, *ngIf="inProgress", color="primary", disabled)
+          mat-spinner([diameter]="19", style="display:inline")
+          div.ml-4(style="display:inline") In Progress
+        

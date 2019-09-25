@@ -1,0 +1,28 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+.col-12(style="background-color: #f5f5f5; padding: 10px") 
+  mat-spinner(*ngIf="isLoading", [diameter]="25", style="margin: auto")
+  div(*ngIf="executionList.length > 0")
+    .list-group(*ngFor="let execution of executionList")
+      a.list-group-item.list-group-item-action(style="", [routerLink]="['/control-panel']", [queryParams]="{id: execution._id}") 
+        .pull-left
+          i.fa.fa-fw.fa-bar-chart(style="color: orange") 
+          |  {{execution.startTime}}
+        .pull-right
+          div([attr.class]="execution.testResult + '-dash'") {{execution.testResult}}
+  div(*ngIf="!isLoading && executionList.length == 0", style="text-align:center")
+    p There are no executions for this instance.

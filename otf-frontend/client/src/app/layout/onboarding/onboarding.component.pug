@@ -1,0 +1,83 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+router-outlet
+//div([@routerTransition])
+  app-page-header([heading]="'Onboarding'", [icon]="'fa-edit'")
+  .row
+
+    .col-lg-6
+  
+      .card.mb-12
+        .card-header
+          | Virtual Test Heads
+        .card-body
+          .list-group
+            a.list-group-item.list-group-item-action(href="#",*ngFor="let vth of vth_list")
+              b {{ vth.test_head_id }}
+              p {{ vth.description }}
+              a(href="{{ vth.url_path }}") {{ vth.url_path }}
+
+    .col-lg-6
+
+      .card.bg-light.mb-12
+        .card-header
+          | New Virtual Test Head
+        .card-body
+          form(role='form')
+            fieldset.form-group
+              label Test Head ID
+              input.form-control(type="text", )
+              p
+            
+              label Test Head Name
+              input.form-control(type="text", )
+              p
+
+              label Description
+              input.form-control(type="text",)
+              p
+
+              label Test Head Type
+              select.form-control()
+                option Proxy
+                option Regular
+                option Script
+                option Adapter
+              p
+              
+              label Implementation Language
+              select.form-control()
+                option Java
+                option Python
+                option Javascript/NodeJS 
+              p
+              
+              label Base URL
+              input.form-control(type="url")
+              p
+
+              label Request Method
+              input.form-control(type="url")
+              p
+
+              label Creator
+              input.form-control(type="text")
+              p
+
+              button.btn.btn-primary((click)='next($event)') Submit 
+
+ <router-outlet></router-outlet>

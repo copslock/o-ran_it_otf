@@ -1,0 +1,89 @@
+appName: otf-service-api
+version: 0.0.1-SNAPSHOT
+image: otf-service-api:0.0.1-SNAPSHOT
+namespace: org-oran-otf
+nodePort: 32303
+replicas:
+  dev: 2
+  st: 1
+  prod: 2
+env: dev
+# Environment variables for the service api.
+otf:
+  mongo:
+    dev:
+      host: localhost:27017,localhost:27017,localhost:27017
+      replicaSet: mongoOTF
+      database: otf
+    st:
+      host: localhost:27017,localhost:27017,localhost:27017
+      replicaSet: mongoOTF
+      database: otf_st
+    prod:
+      host: localhost:18720,localhost:18720,localhost:18720
+      replicaSet: otf-rs-prod2
+      database: otf
+    username: "!"
+    password: "!"
+  camunda:
+    dev:
+      host: https://localhost
+      port: 31313
+    st:
+      host: https://localhost
+      port: 31313
+    prod:
+      host: https://localhost
+      port: 31313
+    prod_dr:
+      host: https://localhost
+      port: 31313
+    uri:
+      process_definition: rest/process-definition/key
+      delete_test_strategy: otf/tcu/delete-test-strategy/v1/deployment-id
+      delete_test_strategy_test_definition_id: otf/tcu/delete-test-strategy/v1/test-definition-id
+      execute_test: otf/tcu/execute/workflowRequest
+      deploy_test_strategy_zip: otf/tcu/deploy-test-strategy-zip/v1
+      process_instance_completion_check: otf/tcu/process-instance-completion-check/v1
+      health: /otf/health/v1
+    executionUri: otf/tcu/execute-test/v1
+    pollingUri: otf/tcu/process-instance-completion-check/v1
+    deploymentUri: otf/tcu/deploy-test-strategy-zip/v1
+    processDefinitionKeyUri: rest/process-definition/key
+    deploymentDeletionUri: otf/tcu/delete-test-strategy/v1/deployment-id
+    testDefinitionDeletionUri: otf/tcu/delete-test-strategy/v1/test-definition-id
+  api:
+    poll_interval: 6000
+    poll_attempts: 50
+
+# permission type for aaf
+aafPermType:
+  dev: org.oran.otf.svcapi
+  st:  org.oran.otf.st.svcapi
+  prod:  org.oran.otf.prod.svcapi
+
+cadiHostname:
+  dev: localhost
+  st: localhost
+  prod: localhost
+  prod_dr: localhost
+  
+# Secret related information.
+sharedSecret: otf-aaf-credential-generator
+sharedCert: otf-cert-secret-builder
+cert:
+  dev: 
+    name: otf_dev.p12
+    path: opt/cert/otf_dev.p12
+  st: 
+    name: otf_st.p12
+    path: opt/cert/otf_st.p12
+  prod: 
+    name: otf_prod.p12
+    path: opt/cert/otf_prod.p12
+  
+pvc:
+  dev: org-oran-otf-dev-logs-pv
+  prod: org-oran-otf-prod-logs-pv
+
+

@@ -1,0 +1,44 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+h2.mb-1(mat-dialog-title) Search Users By Email
+//input.bg-light.form-control(mat-dialog-title, type="text", placeholder="Search...", [(ngModel)]="search.testName")
+mat-form-field(style="width:100%")
+  input(matInput, type='search', placeholder='Search email...', color='blue', [(ngModel)]='search.email')
+  button(mat-button, *ngIf='search.email', matSuffix, mat-icon-button, aria-label='Clear', (click)="search.email=''")
+    mat-icon close
+
+mat-dialog-content
+  .row
+    .col-md-8
+      .list-group
+        .px-4.py-3
+          .mr-1.ml-1(*ngFor="let user of users | filterBy:search")
+            mat-checkbox(*ngIf="search.email.length > 0", [(ngModel)]="user.isSelected", (change)="selectUser(user)") 
+              .ml-1
+                h5 {{ user.firstName }} {{user.lastName}} 
+                p.mb-0 {{ user.email }}
+    .col-md-4
+      h4(*ngIf="selectedUsers.length > 0") Selected Users
+      .list-group
+        .mr-1.ml-1(*ngFor="let user of selectedUsers")
+          mat-checkbox([(ngModel)] = "user.isSelected", (change)="unselectUser(user)") 
+            .ml-1
+                h5 {{ user.firstName }} {{user.lastName}} 
+                p.mb-0 {{ user.email }}
+mat-dialog-actions 
+    button.bg-primary.text-white(mat-button, (click)="addUsers()") Add To Group
+               

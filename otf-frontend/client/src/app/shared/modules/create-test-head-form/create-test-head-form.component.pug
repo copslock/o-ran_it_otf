@@ -1,0 +1,78 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+form(#testHeadForm="ngForm", style="width:100%")
+  .row
+    .col-sm-6
+      mat-form-field(*ngIf="vth._id")
+        input(matInput, type="text", name="_id", placeholder="Test Head ID", [ngModel]='vth._id', disabled)
+
+      mat-form-field
+        input(matInput, type="text", name="test_head_name", placeholder="Name", [(ngModel)]="vth.testHeadName", required)
+
+      mat-form-field
+        input(matInput, type="text", name="test_head_hostname", placeholder="Hostname", [(ngModel)]="vth.hostname")
+
+      mat-form-field
+        input(matInput, type="text", name="test_head_urlPath", placeholder="Resource Path", [(ngModel)]="vth.resourcePath")
+
+    .col-sm-6
+      mat-form-field
+        input(matInput, name="description", placeholder="Description", [(ngModel)]="vth.testHeadDescription", required)
+
+      mat-form-field
+        input(matInput, type="text", name="test_head_port", placeholder="Port", [(ngModel)]="vth.port")
+
+      .row
+          .col-sm-4
+             mat-checkbox(name="test_head_authorization_enabled", (change)="markAsDirty()", [(ngModel)]="vth.authorizationEnabled") Authorization
+
+          .col-sm-3
+              mat-form-field
+                  input(matInput, type="text", name="test_head_authorization_type", placeholder="Type (ex: ApiKey)", [(ngModel)]="vth.authorizationType")
+
+          .col-sm-5
+              mat-form-field
+                  input(matInput, type="text", autocomplete="off", name="test_head_authorization_credential", placeholder="Password", [(ngModel)]="vth.authorizationCredential")
+
+
+
+          //- mat-form-field
+      //-   mat-select((selectionChange)="markAsDirty()", name="ns", placeholder="User Group", [(value)]="vth.groupId", required)
+      //-     mat-option(*ngFor="let group of groups", value="{{group._id}}") {{ group.groupName }}
+
+    .col-12
+      h5.text-muted vthInputTemplate.yaml
+      input( type="file", id="file", (change)="saveFileContents()")
+      div(style="border: 1px solid lightgrey; font-size: 16px !important")
+        codemirror([config]="codeConfig", [(ngModel)]='vth.vthInputTemplate', name="vthInputTemplate")
+
+  //- .row.mt-3
+  //-   .col
+  //-     h5.text-muted vthOutputTemplate.yaml
+  //-     div(style="border: 1px solid lightgrey; font-size: 16px !important")
+  //-       codemirror([config]="codeConfig", [(ngModel)]='vth.vthOutputTemplate', name="vthOutputTemplate")
+
+
+  .row(style="height:30px")
+  .row.form-buttons
+    .col-12
+      .pull-left
+        .mr-3(mat-button, *ngIf="testHeadForm.form.valid && !testHeadForm.form.dirty && options.goal == 'edit'") saved
+          mat-icon(style="color:green") check
+      .pull-right
+        button.mr-3(mat-raised-button, color="primary", (click)='create()', *ngIf="options.goal == 'create'", [disabled]="!testHeadForm.form.valid") Create
+        button.mr-3(mat-raised-button, color="accent", (click)='update()', *ngIf="options.goal == 'edit'", [disabled]="!testHeadForm.form.valid || !testHeadForm.form.dirty") Update

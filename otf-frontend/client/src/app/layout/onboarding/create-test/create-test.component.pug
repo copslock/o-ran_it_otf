@@ -1,0 +1,92 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div 
+  h2 Onboarding
+  ol.breadcrumb.bg-light
+    li.breadcrumb-item
+      a(href="#") Onboarding
+    li.breadcrumb-item
+      a(href="#") Test Heads
+    li.breadcrumb-item.active Test Definition
+
+  .row([@routerTransition])
+    .col-12
+      mat-card.mb-5
+        mat-card-header.bg-primary.text-white
+          mat-card-title
+            h4 Create Test Definition
+        mat-card-content
+          app-create-test-form([listKey]="listKey")
+      //.card.border-primary
+        .card-header.bg-primary.text-white.text-center
+          h4 Create New Tests
+        .card-body
+          app-create-test-form
+
+    //.col-sm-4
+      h4 Saved Tests
+
+      input.form-control.bg-light.mb-3([(ngModel)]="search.testName", type="text", placeholder="Search...")
+      .list-group
+          a.list-group-item.list-group-item-action(*ngFor="let test of test_list | filterBy: search", style="cursor:pointer")
+            b {{ test.testName }}
+
+
+//div
+  
+
+  .row
+    .col-sm-10
+      app-page-header([heading]="'Onboarding'", [icon]="'fa-edit'")
+      ol.breadcrumb.bg-light
+        li.breadcrumb-item
+          a(href="#") Onboarding
+        li.breadcrumb-item
+          a(href="#") Test Heads
+        li.breadcrumb-item
+          a(href="#") Test Strategies
+        li.breadcrumb-item.active Create Test
+      
+    //  div
+        div.ps(style="position: relative; max-width: 600px; max-height: 40px;", [perfectScrollbar]="") 
+          div hi
+
+      .footer.row.p-2.bg-light([@routerTransition], style="box-shadow:inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC; bottom:44px", )
+        .col-sm-12
+          div(style="width:100%")
+            div(style="dispaly:inline-block") Test Strategies
+            div(style="display:inline-block") hi
+            //input.form-control.col-sm-2(type="text", style="dispaly:inline-block")
+        .ps(style="position: relative; max-height: 110px", [perfectScrollbar]="config")
+          div.col-sm-12.mb-3(style="white-space: nowrap;")
+            .card.mr-3(*ngFor="let vts of vts_list", style="display:inline-block;border-color: #045C87")
+              .card-header.text-white(style="background:#045C87") {{ vts.test_strategy_name ? vts.test_strategy_name : vts.test_strategy_id }}
+              .card-body
+                img(src="assets/images/VNFHealth.PNG", style="width:100px")
+  
+    //.sidebar-right.col-sm-2.bg-light.p-2(style="box-shadow:inset 11px 0px 8px -10px #CCC, inset -11px 0px 8px -10px #CCC;")
+      .ps(style="position: relative;", [perfectScrollbar]="")
+        .card.mb-3.border-primary(*ngFor="let vth of vth_list")
+          .card-header.text-white.bg-primary {{ vth.test_head_name ? vth.test_head_name : vth.test_head_id }}
+          .card-body
+            | {{ vth.description }}
+
+.footer.bg-primary
+  .row.p-2
+    .col-sm-12
+     // button(mat-raised-button, color="primary", (click)="back()") Back
+      button.pull-right(mat-raised-button, color="accent", (click)="next()") Next

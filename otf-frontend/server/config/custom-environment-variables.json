@@ -1,0 +1,29 @@
+{
+    "authentication": {
+        "secret": "AUTHENTICATION_SECRET"
+    },
+    "serviceApi": {
+        "url": "SERVICEAPI_URL",
+        "uriExecuteTestInstance": "SERVICEAPI_URIEXECUTETESTINSTANCE",
+        "aafId": "SERVICEAPI_AAFID",
+        "aafPassword": "SERVICEAPI_AAFPASSWORD"
+    },
+    "camundaApi": {
+        "url": "CAMUNDAAPI_URL",
+        "aafId": "CAMUNDAAPI_AAFID",
+        "aafPassword": "CAMUNDAAPI_AAFPASSWORD"
+    },
+    "mongo": {
+        "baseUrl": "MONGO_BASEURL",
+        "dbOtf": "MONGO_DBOTF",
+        "replicaSet": "MONGO_REPLICASET",
+        "username": "MONGO_USERNAME",
+        "password": "MONGO_PASSWORD"
+    },
+    "otf": {
+      "url" : "OTF_URL",
+      "email" : "OTF_EMAIL"
+    },
+    "env": "ENV"
+    
+}

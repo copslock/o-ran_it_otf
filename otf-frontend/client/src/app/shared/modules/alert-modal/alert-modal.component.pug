@@ -1,0 +1,83 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div(*ngIf = 'type == "warning"')
+    h2(mat-dialog-title)
+        i.fa.fa-warning
+        div Warning
+    mat-dialog-content
+        p(style="text-align: center") {{data.message}}
+    mat-dialog-actions
+        button(mat-raised-button, color="primary", aria-label='View', (click) = "okay()") OK
+
+div(*ngIf = 'type == "confirmation"')
+    h2(mat-dialog-title)
+        i.fa.fa-check
+        div Confirm
+    mat-dialog-content
+        p(style="text-align: center") {{data.message}}
+    mat-dialog-actions
+        button(mat-raised-button, color="primary", aria-label='Yes', (click) = "confirmed()") Yes
+        button(mat-raised-button, color="primary", aria-label='Cancel', (click) = "canceled()") Cancel
+
+div(*ngIf = 'type == "userAdmin"')
+    h2(mat-dialog-title)
+        i.fa.fa-question
+        div Choose
+    mat-dialog-content
+        p(style="text-align: center") {{data.message}}
+    mat-dialog-actions
+        button(mat-raised-button, color="primary", aria-label='Yes', (click) = "confirmed()") Admin
+        button(mat-raised-button, color="primary", aria-label='Cancel', (click) = "canceled()") User
+
+div(*ngIf = 'type == "alert"')
+    h2(mat-dialog-title)
+        i.fa.fa-times-circle-o
+        div Error
+    mat-dialog-content
+        p(style="text-align: center") {{data.message}}
+    mat-dialog-actions
+        button.bg-primary.mbtn.text-white.mr-1(mat-raised-button, aria-label='OK', (click) = "okay()") OK
+
+div(*ngIf = 'type == "ok"')
+    h2(mat-dialog-title)
+        i.fa.fa-check
+        div Alert
+    mat-dialog-content
+        p(*ngIf="html", [innerHtml]="html")
+        p(*ngIf="!html", style="text-align: center") {{data.message}}
+    mat-dialog-actions
+        button.bg-primary.mbtn.text-white.mr-1(mat-raised-button, aria-label='OK', (click) = "okay()") OK
+
+div(*ngIf = 'type == "info"')
+    h2(mat-dialog-title)
+        div Info
+    mat-dialog-content
+        p(*ngIf="html", [innerHtml]="html")
+        p(*ngIf="!html", style="text-align: center") {{data.message}}
+    mat-dialog-actions
+        button.bg-primary.mbtn.text-white.mr-1(mat-raised-button, aria-label='OK', (click) = "okay()") OK
+
+
+
+//<h1 mat-dialog-title>Add file</h1>
+    <mat-dialog-content>
+      Content goes here
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button>Add</button>
+      <button mat-button>Cancel</button>
+    </mat-dialog-actions>

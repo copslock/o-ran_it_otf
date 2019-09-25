@@ -1,0 +1,187 @@
+/*  Copyright (c) 2019 AT&T Intellectual Property.                             #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+##############################################################################*/
+
+
+/* You can add global styles to this file, and also import other style files */
+$zindex-dropdown:                   900 !default;
+$zindex-sticky:                     920 !default;
+$zindex-fixed:                      950 !default;
+$font-size-base:                    .8rem !default;
+@import "../../../node_modules/bootstrap/scss/bootstrap";
+@import "spinner";
+@import "utils";
+@import "rtl";
+@import "responsive";
+
+.list-group-item {
+    padding: .5rem 1rem;
+}
+
+@media print {
+    .breadcrumb {
+        display: none !important;
+    }
+}
+
+@import '~@angular/material/theming';
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$candy-app-primary: mat-palette($mat-blue, 900);
+
+$candy-app-accent:  mat-palette($mat-orange, A400);
+
+// The warn palette is optional (defaults to red).
+$candy-app-warn:    mat-palette($mat-deep-orange, A700);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($candy-app-theme);
+
+@import "../../../node_modules/perfect-scrollbar/css/perfect-scrollbar.css";
+//@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import "../../../node_modules/codemirror/lib/codemirror.css";
+@import "../../../node_modules/codemirror/theme/eclipse.css";
+
+@import 'ag-grid-community/dist/styles/ag-grid.css';
+@import 'ag-grid-community/dist/styles/ag-theme-material.css';
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Material Icons'), 
+         local('MaterialIcons-Regular'), 
+         url(https://fonts.gstatic.com/s/materialicons/v21/2fcrYFNaTjcS6g4U3t-Y5UEw0lE80llgEseQY3FEmqw.woff2) format('woff2');
+  }
+
+mat-icon{
+    font-family: 'Material Icons' !important
+}
+
+.embedded {
+    box-shadow: inset 0px 11px 8px -10px #CCC, inset 0px -11px 8px -10px #CCC
+}
+
+.mat-mini-fab .mat-button-wrapper>*{
+    vertical-align: 6px !important;
+}
+
+button:focus{
+    outline: none;
+}
+
+mat-card {
+    padding: 0px !important;
+}
+
+mat-card-header {
+    padding: 15px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.mat-card-header-text {
+    width: 100% !important;
+}
+
+mat-card-title {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+mat-card-title button {
+    padding: 3px 8px !important;
+    line-height: 5px !important;
+}
+
+mat-card-title button mat-icon {
+    font-size: 22px !important;
+}
+
+mat-card-content {
+    padding: 24px !important;
+    padding-top: 10px !important;
+}
+
+.highlight-task-running:not(.djs-connection) .djs-visual > :nth-child(1) {
+    fill: rgb(186, 186, 255) !important; /* color elements as green */
+    opacity: .7;
+}
+
+.highlight-task-completed:not(.djs-connection) .djs-visual > :nth-child(1) {
+    fill: rgb(92, 223, 92) !important; /* color elements as green */
+}
+
+.highlight-task-failed:not(.djs-connection) .djs-visual > :nth-child(1) {
+    fill: rgb(255, 83, 83) !important; /* color elements as green */
+}
+
+.dropdown-item {
+    cursor: pointer;
+}
+
+tr:nth-child(even){background-color: #f9f9f9;}
+
+html {
+    height: 100%
+}
+
+body {
+    height: calc(100% - 56px);
+}
+
+.main-container {
+    height: 100%;
+    overflow: scroll !important;
+}
+
+.form-buttons {
+    position:absolute;
+    bottom:0;
+    right:0; 
+    z-index:1000;
+    margin-bottom:-18px
+}
+
+.upload-progress {
+    position: absolute;
+    background-color: green;
+    height: 100%;
+    opacity: .5;
+    top: 0; 
+    left: 0;
+}
+app-form-generator textarea,
+app-form-generator input {
+    width: 100%;
+}
+
+.loader-modal-container .mat-dialog-container{
+    border-radius: 100px;
+    opacity: 0.1;
+}

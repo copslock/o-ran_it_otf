@@ -1,0 +1,162 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+div(#container, style="width:100%;height:100%")
+	form(#testDefinitionForm="ngForm")
+
+		//- Tool Bar
+		div#tool-bar
+			input#file(type="file", #file, hidden, (change)="open()")
+			input#fileForVersion(type="file", #fileForVersion, hidden, (change)="newVersion({fromFile: true})")
+			.row.pl-2
+			
+				//- BPMN Diagram items	
+
+				.col(style="flex: 0 0 180px;-ms-flex: 0 0 180px;")
+					.row.no-margin.pl-1
+						.small.text-muted BPMN Diagram
+					.row.p-0.pl-2(style="margin-top: -10px")
+						button(mat-icon-button, [matMenuTriggerFor]="newMenu")
+							mat-icon insert_drive_file 
+								span(style="margin-left: -7px") arrow_drop_down
+						mat-menu(#newMenu="matMenu")
+							button.text-small(mat-menu-item, (click)="newWorkflow()") New Workflow
+						button(mat-icon-button, matTooltip="Open BPMN", (click)="file.click()")
+							mat-icon folder_open
+						button(mat-icon-button, matTooltip="Download BPMN", (click)="download()")
+							mat-icon cloud_download
+						button(mat-icon-button, matTooltip="View XML", disabled)
+							mat-icon code
+						
+
+				mat-divider([vertical]="true")
+
+				//- Test Definition items
+
+				.col-3()
+					.row.no-margin.pl-1
+						.small.text-muted Test Definition
+					.row.p-0.pl-2(style="margin-top: -10px")
+						//- Save & Update
+						button(mat-icon-button, matTooltip="Save Test Definition", [disabled]="inProgress || !testDefinitionForm.form.valid || (hasBeenSaved && !testDefinitionForm.dirty)", (click)="save()")
+							mat-icon save
+						//- Deploy
+						button(mat-icon-button, matTooltip="Deploy Test Definition", [disabled]="!testDefinitionForm.form.valid || ptd?.currentInstance?.isDeployed || !hasBeenSaved || !testDefinitionForm.pristine || inProgress", (click)="deploy()")
+							mat-icon cloud_upload
+						//- Delete Version
+						button(mat-icon-button, matTooltip="Delete Version", [disabled]="!hasBeenSaved || inProgress", (click)="deleteVersion()")
+							mat-icon delete_forever
+
+						//- Version Select
+						mat-form-field(*ngIf="ptd", style="width: 80px")
+							mat-select(disableOptionCentering, (selectionChange)="setVersion(ptd.currentVersionName)", placeholder="Version", name="selectedVersion", [(ngModel)]="ptd.currentVersionName")
+								mat-option(*ngFor="let instance of ptd.bpmnInstances.slice().reverse()", value="{{instance.version}}") {{ instance.version }}
+						button(mat-icon-button, [matMenuTriggerFor]="versionMenu", matTooltip="New Version")
+							mat-icon add
+						mat-menu(#versionMenu="matMenu")
+							button(mat-menu-item, [matMenuTriggerFor]="fromVersion") Create from version
+							button(mat-menu-item, (click)="newVersion()") Create blank version
+							button(mat-menu-item, (click)="fileForVersion.click()") Create from file
+						mat-menu(#fromVersion="matMenu")
+							button(mat-menu-item, *ngFor="let instance of ptd?.bpmnInstances.slice().reverse(); let i = index", (click)="newVersion({versionIndex: ptd.bpmnInstances.length - i - 1})") {{ instance.version }}
+
+					
+		div#left_panel(#modeler)
+			.panel-buttons
+				.properties-panel-button((click)="toggleProperties()") Properties Panel
+				.properties-panel-button((click)="toggleTestDefinition()") Test Definition
+		div.properties-panel(#sidebar, [hidden]="!showSidebar")
+			div#properties(#properties, [hidden]="!showProperties", style="width:100%")
+			div(#testDefinition, *ngIf="ptd", [hidden]="!showTestDefinition", style="width:100%;")
+				.col-12
+					.row.mt-2
+						.col-12
+							
+							//- Test Definition Form
+
+							h4 Details
+
+							mat-form-field(style="width:100%")
+								input(matInput, type="text", placeholder="Name", name="name", [disabled]="(existingTd && !hasBeenSaved)", [(ngModel)]="ptd.testName", required)
+								mat-error Required
+							mat-form-field(style="width:100%")
+								input(matInput, type="text", placeholder="Description", name="description", [disabled]="(existingTd && !hasBeenSaved)", [(ngModel)]="ptd.testDescription", required)
+								mat-error Required
+							mat-form-field(style="width:100%")
+								mat-select((selectionChange)="markFormAs('dirty')", name="ns", [disabled]="(existingTd && !hasBeenSaved)", placeholder="Group", [(value)]="ptd.groupId", required)
+									mat-option(*ngFor="let group of groups", value="{{group._id}}") {{ group.groupName }}
+								mat-error Required
+							//- mat-form-field(style="width:100%")
+							//- 	input(matInput, type="text", *ngIf="!hasBeenSaved", placeholder="Version", name="version", [(ngModel)]="ptd.currentInstance.version", (keyup)="checkVersionUnique()", required)
+							//- 	mat-select((selectionChange)="switchVersion(ptd.currentVersionName)", placeholder="Version", name="selectedVersion", *ngIf="hasBeenSaved", [(value)]="ptd.currentVersionName", required)
+							//- 		mat-option(*ngFor="let instance of ptd.bpmnInstances", value="{{instance.version}}") {{ instance.version }}
+							//- 	mat-error Required
+							//- 	button(mat-button, matSuffix, color="primary", *ngIf="hasBeenSaved", (click)="newVersion(this.ptd.processDefinitionKey)", onclick="file.click();") New
+
+					//- .row.mt-2
+					//- 	.col-12
+					//- 		h4 Resources
+					//- 		.text-muted A single .zip file with scripts
+					//- input(type="file", #scripts, id="scripts", name="scripts", hidden,  (change)="markFormAs('dirty')", ng2FileSelect, [uploader]="uploader", accept="application/zip")
+					//- .row.mt-1(*ngIf="ptd.currentInstance.resourceFileId")
+					//- 	.col-12
+					//- 		mat-list
+					//- 			mat-list-item
+					//- 				mat-icon(mat-list-icon) insert_drive_file
+					//- 				h4(mat-line) {{ptd.currentInstance.resourceFileName }}
+					//- .row(*ngIf="!ptd.currentInstance.isDeployed")
+					//- 	.col-md-12
+					//- 		button(mat-raised-button, onclick="scripts.click()", color="primary") 
+					//- 			| {{ !ptd.currentInstance.resourceFileId ? 'Choose File' : 'Replace File' }}
+							
+					//- 	.col-md-12
+					//- 		div(*ngIf="uploader?.queue.length > 0")
+					//- 			label File:
+					//- 			ul.list-group(style="position:relative")
+					//- 				li.list-group-item(*ngFor="let item of uploader.queue")
+					//- 					| {{ item?.file?.name }}
+					//- 					div.upload-progress([ngStyle]="{'width': item.progress + '%'}")
+					//- 			//- button.pull-right(mat-button, (click)="upload()") Upload All
+					//- 			label(*ngIf="ptd.currentInstance.resourceFileId && uploader.queue.length > 0 && !saved") This will replace the previous resouce file
+					//- 			button.pull-right(mat-button, color="primary", (click)="clearQueue()") Remove All
+					//- .row(*ngIf="ptd.currentInstance.isDeployed")
+					//- 	.col-12(*ngIf="!ptd.currentInstance.resourceFileId")
+					//- 		| No resources were deployed with this version
+					
+					.row.mt-3
+						.col-12(*ngIf="ptd.currentInstance.testDataTemplate != {}")
+							h4 testInputTemplate.yaml
+							div(style="border: 1px solid lightgrey; font-size: 12px !important")
+								codemirror(*ngIf="isRefreshed", [config]="codeConfig", [(ngModel)]="ptd.currentInstance.testDataTemplate", name="testConfig")
+
+
+			#drag(#handle)
+
+div(style="position:absolute; bottom: 5px; left: 5px")
+	div(*ngIf="inProgress")
+		mat-spinner([diameter]="15", style="display:inline")
+		div.ml-4(style="display:inline") In Progress
+	div(*ngIf="ptd?.currentInstance?.isDeployed") Deployed
+	div(*ngIf="hasBeenSaved && !testDefinitionForm.dirty") saved
+		mat-icon(style="color:green") check
+	
+	//- div Form valid: {{ form.valid }}
+	//- div Form dirty: {{ form.dirty }}
+	//- div hasBeenSaved: {{ hasBeenSaved }}
+	//- div(*ngIf="ptd?.currentInstance?.bpmnHasChanged") ptd.currentInstance.bpmnHasChanged
+	//- 
+	//- button((click)="popup()") popup
+	//- button((click)="nav()") nav

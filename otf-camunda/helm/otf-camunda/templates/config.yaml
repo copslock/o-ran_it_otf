@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.appName }}-config
+data:
+  router_config: |+
+{{if or (eq .Values.env "prod") (eq .Values.env "prod-dr")}}
+{{ .Files.Get .Values.otf.camunda.router.config.prod | indent 4}}
+{{ else if eq .Values.env "st"}}
+{{ .Files.Get .Values.otf.camunda.router.config.st | indent 4}}
+{{ else }}
+{{ .Files.Get .Values.otf.camunda.router.config.dev | indent 4}}
+{{ end }}

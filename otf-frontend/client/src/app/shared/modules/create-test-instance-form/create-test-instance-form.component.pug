@@ -1,0 +1,139 @@
+//-  Copyright (c) 2019 AT&T Intellectual Property.                             #
+//-                                                                             #
+//-  Licensed under the Apache License, Version 2.0 (the "License");            #
+//-  you may not use this file except in compliance with the License.           #
+//-  You may obtain a copy of the License at                                    #
+//-                                                                             #
+//-      http://www.apache.org/licenses/LICENSE-2.0                             #
+//-                                                                             #
+//-  Unless required by applicable law or agreed to in writing, software        #
+//-  distributed under the License is distributed on an "AS IS" BASIS,          #
+//-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+//-  See the License for the specific language governing permissions and        #
+//-  limitations under the License.                                             #
+//- #############################################################################
+
+
+.row(style="margin-left: 0px")
+  .col
+    button.mr-2.mt-2(mat-raised-button, color="primary", (click)="getDefinition()") Select Definition
+    label() Selected Test Defintion: {{ selectedDefinition.testName || "None Selected" }}
+    div.mt-4(*ngIf="selectedDefinition.testName")
+      .col-md-12.mb-4
+        .row
+          mat-form-field.mr-3
+            input(matInput, [(ngModel)]="testInstance.testInstanceName", placeholder="Instance Name", required)
+            mat-error Required
+          mat-form-field
+            input(matInput, [(ngModel)]="testInstance.testInstanceDescription", placeholder="Description") 
+        .row
+          Label() Select BPMN Version
+        .row 
+          .col-md-4
+            mat-select.mr-2([(value)]="selectedBpmn", [disabled]="testInstance.useLatestTestDefinition || editMode", (selectionChange)="changeBpmn()") 
+              mat-option( *ngFor="let bpmn of selectedDefinition.bpmnInstances | filterNonDeployed: myFilter", [value]="bpmn") {{bpmn.version}}
+
+          .col-md-4
+            mat-slide-toggle(*ngIf='!editMode', [(ngModel)]="testInstance.useLatestTestDefinition", (change)="useLatest()") Use latest
+            mat-slide-toggle.ml-2(color="primary", [(ngModel)]="testInstance.simulationMode", (change)="simulationMode()") Simulation Mode
+          
+      mat-accordion
+        mat-expansion-panel([expanded]="false")
+          mat-slide-toggle((change)="toggleYaml()", [checked]="displayYAML") Display Yaml Input
+          mat-expansion-panel-header Test Input
+          div(*ngIf='testInstance.testDataJSON || selectedBpmn.testDataTemplateJSON')
+            app-form-generator(*ngIf="!displayYAML", [JSONData] = 'testInstance.testDataJSON || selectedBpmn.testDataTemplateJSON', [taskId]= '', (childEvent)="saveTestDataOptions($event)" )
+          codemirror(*ngIf="displayYAML", [config]="codeConfig", [(ngModel)] = "testInstance['testData']")
+      
+      //- If Not in simulation mode, display vth input fields
+      div(*ngIf="!testInstance.simulationMode")
+        mat-slide-toggle.mt-4.mb-2((change) = "testHeadYaml()") Display Yaml (All VTHs)
+        mat-accordion(*ngFor = 'let testHead of selectedBpmn.testHeads; let i = index')
+          mat-expansion-panel(*ngIf="editMode || (testHead.testHeadId.testHeadName && testHead.testHeadId.testHeadName.toLowerCase() != 'robot')",[expanded]='false')
+            mat-expansion-panel-header {{ testHead.testHeadId.testHeadName || testInstance.vthInput[testHead.bpmnVthTaskId + "testHeadName"] }} ({{testHead.bpmnVthTaskId}})
+            app-form-generator(*ngIf= "!testHeadYAML", [JSONData] = 'testInstance.vthInput[testHead.bpmnVthTaskId] || testHead["testHeadId"]["vthInputTemplateJSON"]', [taskId]="testHead.bpmnVthTaskId",  (childEvent)="saveFormOptions($event)")
+
+            codemirror(*ngIf="testHeadYAML", [config]="codeConfig", [(ngModel)] = "testInstance['vthInputYaml'][testHead.bpmnVthTaskId]")
+      
+          mat-expansion-panel(*ngIf="(testHead.testHeadId.testHeadName && testHead.testHeadId.testHeadName.toLowerCase() == 'robot')", [expanded]='false')
+            mat-expansion-panel-header {{ testHead.testHeadId.testHeadName || testInstance.vthInput[testHead.bpmnVthTaskId + "testHeadName"]}} ({{testHead.bpmnVthTaskId}}) Robot Files
+            mat-panel-title Resources
+            .row
+              .col-md-3
+                //- .mb-2 TESTING GIT TRACKING
+                //-   | Multiple Files 
+                //-   mat-slide-toggle(color="primary", name="isZip", [(ngModel)]="isZip", (change)="uploader.clearQueue()")
+                //-   |  .zip
+                //- div 
+                //-   input(*ngIf="!isZip", type="file", name="scripts", ng2der")FileSelect, [uploader]="uploader", multiple)
+                input(*ngIf="isZip", type="file", name="scripts", ng2FileSelect, [uploader]="uploaders[testHead.bpmnVthTaskId]", accept="application/zip")
+              .col-md-8.ml-2
+                div(*ngIf="uploaders[testHead.bpmnVthTaskId].queue.length > 0")
+                  label Files:
+                  ul.list-group(style="position:relative")
+                    li.list-group-item(*ngFor="let item of uploaders[testHead.bpmnVthTaskId].queue")
+                      | {{ item?.file?.name }}
+                      div.upload-progress([ngStyle]="{'width': item.progress + '%'}")
+                  //button.pull-right(mat-button, (click)="upload()") Upload All
+                  button.pull-right(mat-button, color="primary", (click)="uploaders[testHead.bpmnVthTaskId].clearQueue()") Remove All
+      
+      //- If in simulation mode, show simulated outputs and delays
+      div.mt-4(*ngIf="testInstance.simulationMode && testInstance.simulationVthInput")
+        mat-accordion
+          mat-expansion-panel(*ngFor="let testHead of selectedBpmn.testHeads; let i = index")
+            mat-expansion-panel-header 
+              span(style="color: #2196f3") Simulated 
+              | &nbsp; {{ testHead.testHeadId.testHeadName || testInstance.vthInput[testHead.bpmnVthTaskId + "testHeadName"] }} ({{testHead.bpmnVthTaskId}})
+            codemirror([config]="codeJsonConfig", *ngIf="testInstance.simulationVthInput[testHead.bpmnVthTaskId]", [(ngModel)]="testInstance.simulationVthInput[testHead.bpmnVthTaskId]")
+          //- h5.text-muted testHeadData.yaml
+          //-  div(style="border: 1px solid lightgrey")
+          //-   codemirror([config]="codeConfig", value = "{{ testInstance['testData']}}", [(ngModel)]='testInstance["testData"]')
+      div.mt-4(*ngIf="checkPfloInputLength()")
+        h4 PFLO Inputs
+        mat-accordion
+          mat-expansion-panel(*ngFor="let pflo of selectedBpmn.pflos; let i = index" color="primary")
+            mat-expansion-panel-header {{testInstance.pfloInput[pflo.bpmnPfloTaskId + "pfloName"]}} ({{pflo.bpmnPfloTaskId}})
+            .row
+              .col-md-6()
+                h5 Stop on Failure
+                mat-form-field
+                  mat-select(placeholder="Interrupt On Failure", [(value)]="testInstance.pfloInput[pflo.bpmnPfloTaskId]['interruptOnFailure']", required)
+                    mat-option([value]="false") False
+                    mat-option([value]="true") True
+                h5 Max Number of Failures
+                mat-form-field
+                  input(matInput, type="number", [(ngModel)] = "testInstance.pfloInput[pflo.bpmnPfloTaskId]['maxFailures']")
+              .col-md-6
+                h5 Number of Threads
+                mat-form-field
+                  input(matInput, type="number", [(ngModel)] = "testInstance.pfloInput[pflo.bpmnPfloTaskId]['threadPoolSize']")
+                
+                .dropdown.mt-1(ngbDropdown, autoClose="outside", (openChange)="clearSelectedValues()", placement="left-top")
+                  button(mat-raised-button, [disabled]="editMode",  color="primary", ngbDropdownToggle, (click)="null") Add Instance
+                    i.ml-1.fa.fa-caret-down
+                  .dropdown-menu(ngbDropdownMenu)
+                    h4.mb-2.ml-1(style="font-weight: bold;") Add Instances
+                    input.ml-1(matInput, type='search', placeholder='Search...', color='blue', [(ngModel)]='search.testInstanceName')
+                    div(style="max-height: 300px; overflow-y: scroll")
+                      .px-4.py-3
+                        .mr-2.ml-2(*ngFor="let instance of instances | filterBy:search")
+                          mat-checkbox([(ngModel)]='instance.isSelected') {{instance.testInstanceName}} 
+                    div( style="text-align: center")            
+                      button.primary.mr-1(mat-raised-button, aria-label='Add', color="primary", (click)='addInstancesToPflo(pflo.bpmnPfloTaskId)') Add
+                  
+              h4.mt-2(*ngIf="testInstance.pfloInput[pflo.bpmnPfloTaskId].args.length && !editMode", style="width:100%") Workflows
+                mat-accordion
+                  mat-expansion-panel(*ngFor="let workReq of testInstance.pfloInput[pflo.bpmnPfloTaskId].args; let i = index")
+                    mat-expansion-panel-header(style="align-text:center") {{tiNameLookup[workReq.testInstanceId]}}
+                      //button.primary.mr-1.ml-4(mat-mini-fab, aria-label='Remove', color="warn", (click)="deleteWorkReq(pflo.bpmnPfloTaskId, i)")
+                      i.fa.fa-remove.ml-2((click)="deleteWorkReq(pflo.bpmnPfloTaskId, i)")
+                    app-workflow-request([formData]='testInstance.pfloInput[pflo.bpmnPfloTaskId].args[i]', [taskId]="pflo.bpmnPfloTaskId", [index]="i",  (childEvent)="saveWorkReqForm($event)")
+.row(style="height:40px")
+.row.form-buttons(*ngIf = "selectedDefinition.testName")
+  .col-12.mt-3
+    .pull-right
+      h5.mr-2(style="color: Red", *ngIf='executionFailed') Tests failed to execute! 
+      button.mr-2(mat-raised-button, *ngIf='!editMode', color="primary", (click)="saveAll()") Save
+      button(mat-raised-button, *ngIf='!editMode', color="warn", (click)="saveAndExecute()") Save and Execute
+      button.mr-2(mat-raised-button, *ngIf='editMode', color="primary", (click)="updateInstance()") Update
+      button.mr-2(mat-raised-button, *ngIf='editMode', color="primary", (click)="cancel()") Cancel

@@ -1,0 +1,46 @@
+<!-- Copyright (c) 2019 AT&T Intellectual Property.                            #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+#############################################################################-->
+
+
+<div class="login-page" [@routerTransition]>
+    <div class="row justify-content-md-center">
+        <div class="col-md-4">
+            <img src="assets/images/NetworkLogo.jpg" width="200px" class="user-avatar" />
+            <h1>Open Test Framework</h1>
+            <form #login="ngForm" (ngSubmit)="onLoggedin()" role="form">
+                <div class="form-content">
+                    <div class="form-group">
+                        <input type="text" [(ngModel)]="User.email" [ngModelOptions]="{standalone: true}" class="form-control input-underline input-lg" id="email" #email="ngModel" placeholder="Email">
+                    </div>
+                    
+
+                    <div class="form-group">
+                        <input type="password" [(ngModel)]="User.password" [ngModelOptions]="{standalone: true}" class="form-control input-underline input-lg" id="password"  placeholder="Password">
+                        
+                    </div>
+                    <div *ngIf="loginFailed && (email.dirty || email.touched)"
+                            class="alert-danger">
+                            <div>
+                                Username/Password is incorrect.
+                            </div>
+                    </div>
+                </div>
+                <button class="btn rounded-btn" type="submit" id="login"> Log in </button>
+                &nbsp;
+                <a class="btn rounded-btn" [routerLink]="['/signup']">Register</a>
+            </form>
+        </div>
+    </div>
+</div>
