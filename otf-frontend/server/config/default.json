@@ -1,0 +1,52 @@
+{
+  "host": "0.0.0.0",
+  "path": "otf/api/",
+  "base-path": "otf/api/v1/",
+  "port": 80,
+  "ssl": false,
+  "public": "../../../client/dist/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "authentication": {
+    "strategies": [
+      "jwt",
+      "local"
+    ],
+    "path": "otf/api/v1/authentication",
+    "service": "otf/api/v1/users",
+    "jwt": {
+      "header": {
+        "typ": "access"
+      },
+      "audience": "https://localhost",
+      "subject": "anonymous",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "local": {
+      "entity": "user",
+      "usernameField": "email",
+      "passwordField": "password"
+    }
+  },
+  "rate-limit": {
+    "mongoStore": {
+      "collection": "rateLimits"
+    },
+    "services": {
+      "users": {
+        "max": 5,
+        "windowMs": 60000,
+        "message": "User registration limit reached. Please wait before trying again."
+      },
+      "authentication": {
+        "max": 1,
+        "windowsMs": 250000,
+        "message": "Authentication limit reached. Please wait before trying again."
+      }
+    }
+  }
+}

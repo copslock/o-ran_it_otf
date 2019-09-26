@@ -111,7 +111,6 @@ typings/
 
 
 # End of https://www.gitignore.io/api/node,angular
-server/config/default.json
 
 # certs
 server/config/cert/*.pem
