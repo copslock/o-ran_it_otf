@@ -5,8 +5,8 @@ FROM python:2.7
 # ARG http_proxy="localhost:8080"
 # ARG https_proxy="localhost:8080"
 
-ENV NAMESPACE=namespace
-ENV APP_NAME=otf-ping-test-head
+ENV NAMESPACE=dev
+ENV APP_NAME=otf-ssh-test-head
 ENV APP_VERSION=1.0
 
 RUN python --version
