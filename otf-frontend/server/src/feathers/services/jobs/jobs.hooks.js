@@ -119,7 +119,7 @@ module.exports = {
 			(context) => { console.log("AFTER PERMISSIONS")},
 			canExecute(), 
 			async (context) => {
-				const fullUrl = 'https://localhost/' + context.app.get('base-path') + 'schedule-test';
+				const fullUrl = this.options.app.get('otf').url + context.app.get('base-path') + 'schedule-test';
 
 				context.data.executorId = context.params.user._id;
 
@@ -155,7 +155,7 @@ module.exports = {
 			permissions('jobs'),
 			canExecute(),
 			async function (context) {
-			const fullUrl = 'https://localhost/' + context.app.get('base-path') + 'cancel-test';
+			const fullUrl = this.options.app.get('otf').url + context.app.get('base-path') + 'cancel-test';
 
 			if (context.id == null || context.params.user._id == null ||
 				utils.isValidObjectId(context.id) || utils.isValidObjectId(context.params.user._id)) {

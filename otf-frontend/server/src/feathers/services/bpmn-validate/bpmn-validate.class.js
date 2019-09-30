@@ -249,7 +249,7 @@ class Service {
 			}
 		};
 		let options = {
-			url: 'https://localhost/' + this.options.app.get('base-path') + 'file-transfer',
+			url: this.options.app.get('otf').url + this.options.app.get('base-path') + 'file-transfer',
 			headers: {
 				'Authorization': params.headers.Authorization,
 				'Content-Type': "multipart/form-data"

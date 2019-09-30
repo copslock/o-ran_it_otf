@@ -25,7 +25,7 @@
     "test-ci": "TEST_CI=true ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "postinstall": "ng add ng-cli-pug-loader@0.1.7 && node ./ng-add-pug-loader.js"
+    "postinstall": "ng add ng-cli-pug-loader@0.1.7"
   },
   "directories": {
     "lib": "server/src/feathers"

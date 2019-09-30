@@ -1,0 +1,67 @@
+docker login nexus3.onap.org:10001
+   docker | docker
+
+APP PORT MAPPINGS		Internal-k8s		External-k8s	Docker
+otf-frontend			443					32524			8082
+otf-service-api			8443				32303			8081
+otf-camunda				8443				31313			8080
+otf-ping-test-head		5000				32223			5001
+otf-ssh-test-head		5000				32222			5002
+otf-robot-test-head		5000				32224			5003
+
+otf-ping-test-head
+   comment app.run for ssl
+   uncomment app.run without ssl   
+   change port if needed
+   docker build -t otf-ping-test-head:0.0.1-SNAPSHOT .
+   docker run -d --network="host" otf-ping-test-head:0.0.1-SNAPSHOT
+
+otf-ssh-test-head
+   comment app.run for ssl
+   uncomment app.run without ssl   
+   change port if needed
+   docker build -t otf-ssh-test-head:0.0.1-SNAPSHOT .
+   docker run -d --network="host" otf-ssh-test-head:0.0.1-SNAPSHOT
+
+otf-robot-test-head
+   comment app.run for ssl
+   uncomment app.run without ssl   
+   change port if needed
+   docker build -t otf-robot-test-head:0.0.1-SNAPSHOT .
+   docker run -d --network="host" otf-robot-test-head:0.0.1-SNAPSHOT
+
+
+otf-frontend
+   
+
+otf-service-api
+  Modify src/main/resources/application.properties according to needs (disable aaf/ssl, set ports)
+  Add settings.xml from onap website and add profile to use maven default repository and add settings.xml to ~/.m2/ if missing
+  mvn clean install (add flag -DskipTests if it causes the build to fail)
+  navigate to target folder and run "docker build -t otf-service-api:0.0.1-SNAPSHOT ."
+  docker run -d --network="host" otf-service-api:0.0.1-SNAPSHOT
+
+
+otf-camunda
+  Modify src/main/resources/application.yaml according to needs, and validate the yaml is correct format (disable aaf/ssl, set ports)
+  Add settings.xml from onap website and add profile to use maven default repository and add settings.xml to ~/.m2/ if missing
+  mvn clean install (add flag -DskipTests if it causes the build to fail)
+  navigate to target folder and run "docker build -t otf-camunda:0.0.1-SNAPSHOT ."
+  docker run -d --network="host" otf-camunda:0.0.1-SNAPSHOT
+
+Database Notes
+  run sudo installdbs.sh and export PATH=/usr/local/mysql/bin:$PATH to add mysql commands to path
+  run sudo createMongoUser.sh
+  edit mongo to create a replica set by modifying replication and net fields on file /etc/mongod.conf
+    add security: authorization: 'enabled'
+  after script is ran mysql should be able to be used, connect to mysql using the password set by script and mysql command and
+    alter the root password
+      alter user 'root'@'localhost' identified by 'new_password'
+    grant root ability to connect remotely
+      grant all on *.* to 'root'@'%' identified by 'password'
+    create db and exit mysql shell
+      create database 'new_db'
+    create tables using mysql scripts
+      mysql -u root -p db < engine.sql
+      mysql -u root -p db < identity.sql
+
