@@ -1,0 +1,10 @@
+{
+  "base_address": "http://localhost:3000",
+  "actions_path": {
+    "alive": "/appmgr/ric/v1/health/alive",
+    "ready": "/appmgr/ric/v1/health/ready",
+    "list": "/appmgr/ric/v1/xapps",
+    "deploy": "/appmgr/ric/v1/xapps",
+    "delete": "/appmgr/ric/v1/xapps/"
+   }
+}

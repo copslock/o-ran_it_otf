@@ -1,0 +1,113 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{ .Values.appName}}
+    version: {{.Values.version}}
+spec:
+  revisionHistoryLimit: 1
+  minReadySeconds: 10
+  strategy:
+  # indicate which strategy we want for rolling update
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  replicas: {{ .Values.replicas}}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName}}
+      version: {{.Values.version}}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName}}
+        version: {{.Values.version}}
+    spec:
+      serviceAccount: default
+      volumes:
+      - name: {{ .Values.appName}}-cert-volume
+        secret:
+          secretName: {{.Values.sharedCert}}
+          optional: true
+          items:
+          - key: PEM_CERT
+            path: otf.pem
+          - key: PEM_KEY
+            path: privateKey.pem
+      {{ if or (eq .Values.env "st") (eq .Values.env "prod-dr")}}
+      {{else}}
+      - name: logging-pvc
+        persistentVolumeClaim:
+          {{if eq .Values.env "prod"}}
+          claimName: {{ .Values.pvc.prod | quote }}
+          {{ else }}
+          claimName: {{ .Values.pvc.dev | quote }}
+          {{ end }}
+      {{end}}
+      containers:
+      - name: {{ .Values.appName}}
+        image: {{ .Values.image}}
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 5000
+          nodePort: {{.Values.nodePort}}
+          protocol: TCP
+        {{ if eq .Values.env "st"}}
+        resources:
+          limits: 
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+        {{else}}   
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+          requests:
+            memory: "1Gi"
+            cpu: "1"
+        {{end}}
+        env:
+        - name: NAMESPACE
+          value: {{.Values.namespace}}
+        - name: APP_NAME
+          value: {{ .Values.appName}}
+        - name: APP_VERSION
+          value: {{.Values.version}}
+        volumeMounts:
+        - name: {{.Values.appName}}-cert-volume
+          mountPath: /opt/cert
+        {{ if or (eq .Values.env "st") (eq .Values.env "prod-dr")}}
+        {{else}}
+        - name: logging-pvc
+          mountPath: "/otf/logs"
+        {{end}}  
+        livenessProbe:
+          httpGet:
+            path: {{.Values.health}}
+            port: http
+            scheme: HTTP
+            httpHeaders:
+              - name: X-Custom-Header
+                value: Alive
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: {{.Values.health}}
+            port: http
+            scheme: HTTP
+            httpHeaders:
+              - name: X-Custom-Header
+                value: Ready
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+      restartPolicy: Always

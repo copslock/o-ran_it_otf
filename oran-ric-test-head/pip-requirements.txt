@@ -1,0 +1,6 @@
+flask
+flask-cors
+paramiko
+FLASK
+FLASK-CORS
+requests
