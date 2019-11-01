@@ -1,0 +1,3 @@
+download and place jar file in this folder
+
+mvn -s settings.xml dependency:get -Dartifact=org.onap.aaf.authz:aaf-cadi-core:jar:2.1.10_SNAPSHOT
