@@ -48,8 +48,9 @@ module.exports = function (app) {
 		updatedBy: { type: Schema.Types.ObjectId, ref: 'users'},
 		createdBy: { type: Schema.Types.ObjectId, ref: 'users'}
 	}, {
-	timestamps: true,
-	minimize: false
+		shardKey: { groupId: 1 },
+		timestamps: true,
+		minimize: false
 	});
 
 	

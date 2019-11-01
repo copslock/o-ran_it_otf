@@ -62,7 +62,7 @@ public class DataConfig extends AbstractMongoConfiguration {
         MongoCredential.createScramSha1Credential(username, database, password.toCharArray());
 
     MongoClientOptions options =
-        MongoClientOptions.builder().sslEnabled(false).requiredReplicaSetName(replicaSet).build();
+        MongoClientOptions.builder().sslEnabled(true).build();
 
     String[] hostArray = hosts.split(",");
     ArrayList<ServerAddress> hosts = new ArrayList<>();

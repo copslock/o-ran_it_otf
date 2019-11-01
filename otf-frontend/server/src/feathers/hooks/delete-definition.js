@@ -16,6 +16,7 @@
 
 const util = require('../../lib/otf-util');
 const request = require('request');
+const errors = require('@feathersjs/errors');
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
     return async context => {
         let options = {
@@ -40,7 +41,7 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
         }).then(result => {
             
         }).catch(err => {
-            console.log(err);
+            throw new errors.GeneralError(err.body.message);
         });
     };
 };

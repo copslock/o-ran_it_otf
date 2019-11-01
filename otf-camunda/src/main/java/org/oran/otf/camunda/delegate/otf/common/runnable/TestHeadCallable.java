@@ -209,6 +209,8 @@ public class TestHeadCallable implements Callable<TestHeadResult> {
 
   private void saveResult(TestExecution testExecution) {
     Query query = new Query();
+    //TODO: Update for Azure
+    query.addCriteria((Criteria.where("groupId").is(testExecution.getGroupId())));
     query.addCriteria(Criteria.where("_id").is(testExecution.get_id()));
     // Also add businessKey as a criteria because the object won't be found if the business key
     // was somehow modified in the workflow.

@@ -38,6 +38,7 @@ module.exports = function (app) {
 		lockedAt: { type: String },
 		lastRunAt: { type: String }
 	}, {
+		shardKey: { 'data.testSchedule._testInstanceId': 1 },
 		timestamps: true
 	});
 

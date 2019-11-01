@@ -108,7 +108,7 @@ public class TestStrategyServiceImpl implements TestStrategyService {
     //			logger.error(Utilities.getStackTrace(e));
     //		}
 
-    // If a test definition id is supplied, the request intends to update an existing test
+    // If a test definition id is supplied, the request intends to  updatean existing test
     // definition.
     if (request.getTestDefinitionId() != null) {
       // Check if the test definition exists in the database.
@@ -212,8 +212,7 @@ public class TestStrategyServiceImpl implements TestStrategyService {
 
   private boolean isAuthorized(String authorization) {
     User user = Utilities.findUserByAuthHeader(authorization, userRepository);
-    return (user.getEmail().equalsIgnoreCase("email@localhost")
-        || user.getEmail().equalsIgnoreCase("email@localhost"));
+    return (user.getEmail().equalsIgnoreCase(System.getenv("AAF_ID")));
   }
 
   private DeployTestStrategyRequest mapToDeployTestStrategyRequest(String body) {

@@ -58,7 +58,7 @@ module.exports = {
 	before: {
 		all: [authenticate('jwt'), permissions('execute')],
 		find: [ throwError(new errors.MethodNotAllowed()) ],
-		get: [ throwError(new errors.MethodNotAllowed())],
+		get: [ ],
 		create: [
 			(context) => {
 				context.data.executorId = context.params.user._id;

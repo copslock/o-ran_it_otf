@@ -2,7 +2,7 @@
   "host": "0.0.0.0",
   "path": "otf/api/",
   "base-path": "otf/api/v1/",
-  "port": 80,
+  "port": 8080,
   "ssl": false,
   "public": "../../../client/dist/",
   "paginate": {

@@ -28,6 +28,7 @@ public class TestExecutionUtility {
   public static void saveTestResult(
       MongoTemplate mongoOperation, TestExecution execution, String testResult) {
     Query query = new Query();
+    query.addCriteria(Criteria.where("groupId").is(execution.getGroupId()));
     query.addCriteria(Criteria.where("businessKey").is(execution.getBusinessKey()));
     Update update = new Update();
     update.set("testResult", testResult);

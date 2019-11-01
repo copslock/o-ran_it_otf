@@ -31,29 +31,9 @@ module.exports = function (app) {
 		paginate
 	};
 
-	const mongoConfig = app.get('mongo');
-	const rateLimitConfig = app.get('rate-limit');
-
-	const createUserLimiter = new RateLimit({
-		store: new MongoStore({
-			uri: 'mongodb://' + mongoConfig.username + ':' + mongoConfig.password + '@' + mongoConfig.baseUrl +
-				mongoConfig.dbOtf + '?replicaSet=' + mongoConfig.replicaSet,
-			collectionName: rateLimitConfig.mongoStore.collection
-		}),
-		max: app.get('rate-limit').services.users.max,
-		windowsMs: app.get('rate-limit').services.users.windowMs,
-		message: app.get('rate-limit').services.users.message
-	});
-
 	// Initialize our service with any options it requires,
 	// and limit any POST methods.
-	app.use(app.get('base-path') + 'users', (req, res, next) => {
-		if (req.method === 'POST') {
-			createUserLimiter(req, res, next);
-		} else {
-			next();
-		}
-	}, createService(options));
+	app.use(app.get('base-path') + 'users', createService(options));
 
 	// Get our initialized service so that we can register hooks
 	const service = app.service(app.get('base-path') + 'users');

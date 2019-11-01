@@ -61,7 +61,7 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
                             return Promise.reject(context.error);
                         }
                     }).catch(err => {
-                        
+                        throw new errors.GeneralError(err.body.message);
                     });
                 }
             });

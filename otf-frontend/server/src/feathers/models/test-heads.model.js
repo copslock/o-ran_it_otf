@@ -35,6 +35,7 @@ module.exports = function (app) {
 		authorizationEnabled: { type: Boolean, default: false },
 		isPublic: { type: Boolean }
 	}, {
+		shardKey: { groupId: 1 },
 		timestamps: true
 	});
 

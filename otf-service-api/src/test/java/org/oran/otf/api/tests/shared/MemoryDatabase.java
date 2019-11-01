@@ -129,7 +129,7 @@ public abstract class MemoryDatabase {
       user = new User();
       user.setFirstName("Mech");
       user.setLastName("Id");
-      user.setEmail("email@localhost");
+      user.setEmail(System.getenv("AAF_ID"));
       mongoTemplate.save(user, "users");
       user = mongoTemplate.findOne(userQuery, User.class);
     }

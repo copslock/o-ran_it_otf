@@ -164,6 +164,8 @@ public class SynchronousTestInstanceCallable extends ProcessEngineAwareService
       // Add the testExecution to the parentTestExecution
       parentTestExecution.getTestInstanceResults().add(testExecution);
       Query query = new Query();
+      //TODO: Update for Azure
+      query.addCriteria((Criteria.where("groupId").is(parentTestExecution.getGroupId())));
       query.addCriteria(Criteria.where("_id").is(parentTestExecution.get_id()));
       // Also add businessKey as a criteria because the object won't be found if the business key
       // was somehow modified in the workflow.

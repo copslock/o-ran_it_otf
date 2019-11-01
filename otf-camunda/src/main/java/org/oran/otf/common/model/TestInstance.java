@@ -16,6 +16,7 @@
 
 package org.oran.otf.common.model;
 
+import javax.ws.rs.PATCH;
 import org.oran.otf.common.model.local.ParallelFlowInput;
 import org.oran.otf.common.utility.gson.Convert;
 import java.io.Serializable;

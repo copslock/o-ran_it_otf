@@ -16,6 +16,7 @@
 
 package org.oran.otf.common.model;
 
+import javax.validation.constraints.NotNull;
 import org.oran.otf.common.utility.gson.Convert;
 import java.io.Serializable;
 import java.util.Date;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -34,7 +36,8 @@ public class TestHead implements Serializable {
   @Id
   private ObjectId _id;
 
-  @Indexed(unique = true)
+  //@Indexed(unique = true)
+  @NotNull
   private String testHeadName;
 
   private String testHeadDescription;

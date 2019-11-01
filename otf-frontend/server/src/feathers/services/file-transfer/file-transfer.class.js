@@ -16,20 +16,28 @@
 
 const Response = require('http-response-object');
 const Readable = require('stream').Readable;
-const mongooseGridFS = require('mongoose-gridfs');
+const { createModel } = require('mongoose-gridfs');
 const AdmZip = require('adm-zip');
 const errors = require('@feathersjs/errors');
+const mongoose = require('mongoose');
+const ObjectID = require('mongodb').ObjectID;
+const {
+	Aborter,
+	BlockBlobURL,
+	BlobURL,
+	downloadBlobToBuffer,
+	uploadStreamToBlockBlob
+  } = require("@azure/storage-blob");
+
 
 class Service {
 	constructor (options) {
 		this.options = options || {};
-		this.mongoose = this.options.app.get('mongooseClient');
-		this.gridfs = mongooseGridFS({
-			collection: 'fs',
-			model: 'File',
-			mongooseConnection: this.mongoose.connection
-		});
-		this.FileModel = this.gridfs.model;
+		// this.File = createModel({
+		// 	collection: 'fs',
+		// 	model: 'File',
+		// 	mongooseConnection: mongoose.connection
+		// });
 	}
 
 	async find (params) {
@@ -37,14 +45,30 @@ class Service {
 	}
 
 	async get (id, params) {
-		let content = await this.callReadFile(id).then(res => {
-			return res;
-		});
-
-		if(params.query && params.query.robot){
-			content = await this.createRobotResponse(content);
+		if(!id){
+			throw new errors.BadRequest("File id is required");
 		}
-		return content;
+
+		// Get Blob url
+		const blob = BlobURL.fromContainerURL(this.options.app.get('azureStorageContainerUrl'), id);
+		const stats = await blob.getProperties().catch(err => {
+			throw new errors.NotFound();
+		});
+		// const content = await blob.download(Aborter.none, 0);
+		const buffer = Buffer.alloc(stats.contentLength);
+		await downloadBlobToBuffer(
+			Aborter.timeout(30 * 60 * 1000),
+			buffer,
+			blob,
+			0,
+			undefined,
+			{
+			  blockSize: 4 * 1024 * 1024, // 4MB block size
+			  parallelism: 20, // 20 concurrency
+			}
+		  );
+
+		return buffer;
 	}
 
 	async create (data, params) {
@@ -54,31 +78,37 @@ class Service {
             throw new BadRequest("No files found to upload")
         }
 
-        let promises = [];
-
+		let promises = [];
+		
         files.forEach(file => {
-            let promise = new Promise( (resolve, reject) => {
+            let promise = new Promise(async (resolve, reject) => {
 
-                let stream = new Readable();
-                stream.push(file.buffer);
-                stream.push(null);
+				let exists, filename, blob, blockBlob;
+				// Creates the file id and checks that there isn't already a file with that name
+				do {
 
-            	this.FileModel.write(
-            		{
-            			filename: file.originalname,
-            			contentType: file.mimeType
-            		},
-            		stream,
-            		function (error, savedAttachment) {
-            			if (error) {
-            				logger.error(error);
-            				reject(error);
-            			} else {
-                            stream.destroy();
-                            resolve(savedAttachment);
-            			}
-                    }
-                );
+					filename = ObjectID().toString();
+					
+					blob = BlobURL.fromContainerURL(this.options.app.get('azureStorageContainerUrl'), filename);
+					blockBlob = BlockBlobURL.fromBlobURL(blob);
+					exists = await blockBlob.getProperties().catch(err => {
+						if(err.statusCode == 404){
+							exists = false;
+						}
+					});
+
+				} while (exists);
+	
+				blockBlob.upload(Aborter.none, file.buffer.toString(), file.size).then(
+					result => {
+						result._id = filename;
+						resolve(result);
+					}
+				).catch(
+					error => {
+						reject(error);
+					}
+				);
 
             })
 
@@ -90,6 +120,8 @@ class Service {
         return result;
 	}
 
+	
+
 	async update (id, data, params) {
 		return new Response(200, {});
 	}
@@ -99,13 +131,13 @@ class Service {
 	}
 
 	async remove (id, params) {
-		let err = await this.callUnlinkFile(id).then(err => {
-            return err;
-        });
+		// let err = await this.callUnlinkFile(id).then(err => {
+        //     return err;
+        // });
 
-        if(err){
-            throw errors.GeneralError(err);
-        }        
+        // if(err){
+        //     throw errors.GeneralError(err);
+        // }        
 
         return new Response(200, {});
 	}

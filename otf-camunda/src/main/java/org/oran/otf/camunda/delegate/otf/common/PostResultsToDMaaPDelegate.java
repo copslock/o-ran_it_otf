@@ -44,6 +44,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 @Component
+@Conditional(value= FilterCondition.class)
 public class PostResultsToDMaaPDelegate implements JavaDelegate {
 
   private static Logger logger = LoggerFactory.getLogger(PostResultsToDMaaPDelegate.class);

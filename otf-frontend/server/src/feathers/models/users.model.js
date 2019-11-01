@@ -38,6 +38,7 @@ module.exports = function (app) {
 			testDefinitions: [{type: Schema.Types.ObjectId, ref: 'testDefinitions'}]
 		}, { _id: false})
 	}, {
+		shardKey: { email: 1 },
 		timestamps: true
 	});
 

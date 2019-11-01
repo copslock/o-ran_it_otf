@@ -44,6 +44,7 @@ module.exports = function (app) {
 		historicTestDefinition: { type: Object }
 
 	}, {
+			shardKey: { groupId: 1 },
 			timestamps: false
 		});
 	

@@ -13,12 +13,20 @@
         "aafId": "CAMUNDAAPI_AAFID",
         "aafPassword": "CAMUNDAAPI_AAFPASSWORD"
     },
+    "azure": {
+        "storage": {
+            "account": "AZURE_STORAGE_ACCOUNT",
+            "key": "AZURE_STORAGE_KEY",
+            "container": "AZURE_STORAGE_CONTAINER"
+        }
+    },
     "mongo": {
         "baseUrl": "MONGO_BASEURL",
         "dbOtf": "MONGO_DBOTF",
         "replicaSet": "MONGO_REPLICASET",
         "username": "MONGO_USERNAME",
-        "password": "MONGO_PASSWORD"
+        "password": "MONGO_PASSWORD",
+        "connectionString": "MONGO_CONNECTION_STRING"
     },
     "otf": {
       "url" : "OTF_URL",

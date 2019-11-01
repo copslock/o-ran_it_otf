@@ -20,8 +20,11 @@ const mongoData = require('config').mongo;
 const jobTypes = ['test-execution-job'];
 const agenda = new Agenda({
 	db: {
-		address: 'mongodb://' + mongoData.username + ':' + mongoData.password + '@' + mongoData.baseUrl + mongoData.dbOtf + '?replicaSet=' + mongoData.replicaSet,
+		address: mongoData.connectionString,
 		collection: 'agenda'
+	},
+	sort: {
+		nextRunAt: 1
 	}
 });
 

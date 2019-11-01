@@ -748,11 +748,7 @@ public class TestInstanceServiceImpl implements TestInstanceService {
     }
 
     private boolean isOtfMechanizedIdentifier(String email) {
-        return email.equalsIgnoreCase("email@localhost")
-                || email.equalsIgnoreCase("email@localhost")
-                || email.equalsIgnoreCase("email@localhost")
-                || email.equalsIgnoreCase("email@localhost")
-                || email.equalsIgnoreCase("email@localhost");
+        return email.equalsIgnoreCase(System.getenv("AAF_ID"));
     }
 
     private BpmnInstance findBpmnInstance(TestDefinition testDefinition, int version, boolean latest)

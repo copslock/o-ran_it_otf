@@ -100,7 +100,7 @@ public class VirtualTestHeadServiceImpl implements VirtualTestHeadService {
     }
 
     private Response updateTestHeadFields(TestHead testHead, TestHead newTestHead, User user) {
-        Query select = Query.query(Criteria.where("_id").is(testHead.get_id()));
+        Query select = Query.query(Criteria.where("_id").is(testHead.get_id())).addCriteria(Criteria.where("groupId").is(testHead.getGroupId()));
         Update update = new Update();
 
         if (newTestHead.getTestHeadName() != null) {

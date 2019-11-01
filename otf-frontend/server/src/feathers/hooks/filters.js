@@ -24,6 +24,9 @@ const { ObjectID } = require('mongodb');
 module.exports.groupFilter = function (options = null) {
 	return async context => {
 
+		if (!context.params.provider) {
+			return Promise.resolve(context);
+		}
 		
 		switch(context.method){
 			case 'get':
@@ -56,17 +59,13 @@ module.exports.groupFilter = function (options = null) {
 						context.app.services[context.app.get('base-path') + 'groups'].Model.aggregate([
 							{
 								$match: context.params.query
-							},
-							{
-								$graphLookup: {
-									from: "groups",
-									startWith: "$parentGroupId",
-									connectFromField: "parentGroupId",
-									connectToField: "_id",
-									as: "parentGroups"
+							}
+						]).then(async res => {
+							if(res.length){
+								for(let i = 0; i < res.length; i++){
+									res[i]['parentGroups'] = await getParentGroups(context.app.services[context.app.get('base-path') + 'groups'].Model, res[i]);
 								}
 							}
-						]).then(res => {
 							resolve(res);
 						}).catch(err => {
 							throw new errors.GeneralError(err);
@@ -126,6 +125,35 @@ module.exports.groupFilter = function (options = null) {
 		return context;
 	};
 };
+
+getParentGroups = async function(model, group){
+	return new Promise(async (resolve, reject) => {
+		let parentGroups = [];
+		if(group.parentGroupId){
+			model.aggregate([
+				{
+					$match: {
+						'_id': group.parentGroupId
+					}
+				}
+			]).then(async res => {
+				if(res[0] && res[0].parentGroupId){
+					parentGroups.unshift(res[0]);
+					let parents = await getParentGroups(model, res[0]);
+					parents.forEach(e => {
+						parentGroups.unshift(e);
+					});
+				}
+				resolve(parentGroups);
+			}).catch(err => {
+				reject(err);
+			})
+		}else{
+			resolve();
+		}
+	});
+	
+}
 
 getChildGroups = async function(model, group){
 	return new Promise(async (resolve, reject) => {

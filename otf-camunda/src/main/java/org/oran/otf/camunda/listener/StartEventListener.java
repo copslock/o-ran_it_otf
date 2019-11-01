@@ -20,6 +20,7 @@ import org.oran.otf.camunda.exception.TestExecutionException;
 import org.oran.otf.camunda.model.ExecutionConstants;
 import org.oran.otf.camunda.workflow.utility.WorkflowUtility;
 import org.oran.otf.common.model.TestExecution;
+import org.oran.otf.common.repository.TestExecutionRepository;
 import org.oran.otf.common.utility.Utility;
 import com.google.gson.JsonObject;
 import com.mongodb.client.result.UpdateResult;
@@ -83,8 +84,9 @@ public class StartEventListener extends ReactorExecutionListener {
     testExecution.setTestResult(result);
     testExecution.setProcessInstanceId(execution.getProcessInstanceId());
 
-
     Query query = new Query();
+    //TODO: Update needs new query for Azure
+    query.addCriteria((Criteria.where("groupId").is(testExecution.getGroupId())));
     query.addCriteria(Criteria.where("businessKey").is(execution.getProcessBusinessKey()));
     Update update = new Update();
     update.set("testResult", testExecution.getTestResult());

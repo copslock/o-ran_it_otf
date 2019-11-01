@@ -705,16 +705,17 @@ export class ModelerComponent implements OnInit {
   //Get the xml of the default bpmn file
   async getDefaultFlow() {
     return new Promise((resolve, reject) => {
-      this._fileTransfer.get('5d0a5357e6624a3ef0d16164').subscribe(
-        data => {
-          let bpmn = new Buffer(data as Buffer);
-          resolve(bpmn.toString());
-        },
-        err => {
-          this.errorPopup(err.toString());
-          reject(err);
-        }
-      );
+      resolve("<?xml version=\"1.0\" encoding=\"UTF-8\"?\>\<bpmn:definitions targetNamespace=\"http:\/\/bpmn.io\/schema\/bpmn\" \>\<bpmn:process id=\"\" isExecutable=\"true\"\>\<bpmn:startEvent id=\"StartEvent_1\" /\>\</bpmn:process\>\<bpmndi:BPMNDiagram id=\"BPMNDiagram_1\"\>\<bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"Process_1ai7kus\"\>\<bpmndi:BPMNShape id=\"_BPMNShape_StartEvent_2\" bpmnElement=\"StartEvent_1\"\>\<dc:Bounds x=\"179\" y=\"159\" width=\"36\" height=\"36\" /\>\</bpmndi:BPMNShape\>\</bpmndi:BPMNPlane\>\</bpmndi:BPMNDiagram\>\</bpmn:definitions\>")
+      // this._fileTransfer.get('5d0a5357e6624a3ef0d16164').subscribe(
+      //   data => {
+      //     let bpmn = new Buffer(data as Buffer);
+      //     resolve(bpmn.toString());
+      //   },
+      //   err => {
+      //     this.errorPopup(err.toString());
+      //     reject(err);
+      //   }
+      // );
     });
   }
 
@@ -730,6 +731,7 @@ export class ModelerComponent implements OnInit {
       this._fileTransfer.get(this.ptd.currentInstance.bpmnFileId).subscribe(
         result => {
           let bpmn = new Buffer(result as Buffer);
+          console.log(bpmn.toString())
           resolve(bpmn.toString());
         },
         err => {

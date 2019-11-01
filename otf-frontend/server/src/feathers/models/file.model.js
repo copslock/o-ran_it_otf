@@ -14,16 +14,37 @@
 ##############################################################################*/
 
 
-const mongooseGridFS = require('mongoose-gridfs');
-
 module.exports = function (app) {
-	const mongoose = app.get('mongooseClient');
+	const mongooseClient = app.get('mongooseClient');
+	const { Schema } = mongooseClient;
+	const files = new Schema({//Esquema base de los usuarios.
+        length: {
+            type: Number
+        },
+        chunkSize: {
+            type: Number
+        },
+        uploadDate: {
+            type: Date
+        },
+        md5: {
+            type: String
+        },
+        filename: {
+            type: String
+        },
+        contentType: {
+            type: String
+        },
+        metadata: {
+            type: Object
+        },
+        path:{
+            type:String,
+            readonly:true
+        }
+    },{collection:`fs.files`, shardKey: { filename: 1 }});
+	
+	return mongooseClient.model('files', files);
 
-	const gridfs = mongooseGridFS({
-		collection: 'fs',
-		model: 'File',
-		mongooseConnection: mongoose.connection
-	});
-
-	return gridfs.model;
 };

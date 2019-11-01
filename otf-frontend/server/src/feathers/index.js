@@ -39,6 +39,9 @@ const appHooks = require('./app.hooks');
 const channels = require('./channels');
 const authentication = require('./authentication');
 
+// Azure Storage
+const azureStorage = require('../lib/azure-storage');
+
 // Mongoose
 const mongoose = require('../lib/mongoose');
 const _mongoose = require('mongoose');
@@ -104,9 +107,11 @@ app.configure(socketio(function (io) {
 // 	});
 // });
 
+// Configure Azure storage
+app.configure(azureStorage);
+
 // Configure Mongoose driver before setting up services that use Mongoose
 app.configure(mongoose);
-
 // Set up database dependent components once the connection is ready to prevent unexpected results
 _mongoose.connection.on('open', (ref) => {
 	app.configure(authentication);

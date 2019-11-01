@@ -16,13 +16,13 @@
 
 package org.oran.otf.camunda.delegate.otf.common;
 
+import com.mongodb.client.result.UpdateResult;
 import org.oran.otf.camunda.exception.TestExecutionException;
 import org.oran.otf.camunda.model.ExecutionConstants;
 import org.oran.otf.camunda.workflow.utility.WorkflowUtility;
 import org.oran.otf.common.model.TestExecution;
 import org.oran.otf.common.repository.TestExecutionRepository;
 import org.oran.otf.common.utility.Utility;
-import com.mongodb.client.result.UpdateResult;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -90,6 +90,8 @@ public class LogTestResultDelegate implements JavaDelegate {
     // processBusinessKey from the delegate execution because it is saved to the database before the
     // user can modify the value.
     Query query = new Query();
+    //TODO: Update query needs to be changed for Azure
+    query.addCriteria((Criteria.where("groupId").is(testExecution.getGroupId())));
     query.addCriteria(Criteria.where("businessKey").is(execution.getProcessBusinessKey()));
     Update update = new Update();
     update.set("testResult", testExecution.getTestResult());

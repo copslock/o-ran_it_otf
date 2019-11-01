@@ -129,7 +129,7 @@ export class GroupService extends ModelService {
       if (mappedArr.hasOwnProperty(_id)) {
         mappedElem = mappedArr[_id];
         // If the element is not at the root level, add it to its parent array of children.
-        if (mappedElem.parentGroupId) {
+        if (mappedElem.parentGroupId && mappedArr[mappedElem['parentGroupId']]) {
           mappedArr[mappedElem['parentGroupId']]['children'].push(mappedElem);
         }
         // If the element is at the root level, add it to first level elements array.

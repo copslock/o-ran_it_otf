@@ -224,8 +224,10 @@ public class CallTestHeadDelegate implements JavaDelegate {
 //    WorkflowTask.printWorkflowTaskResources();
   }
 
-  private void saveTestHeadResults(String businessKey) {
+  private void saveTestHeadResults(String businessKey, String groupId) {
     Query query = new Query();
+    //TODO: Update needs to be changed to work with Azure
+    query.addCriteria(Criteria.where("groupId").is(groupId));
     query.addCriteria(Criteria.where("businessKey").is(businessKey));
     Update update = new Update();
     update.set("testHeadResults", testHeadResults);

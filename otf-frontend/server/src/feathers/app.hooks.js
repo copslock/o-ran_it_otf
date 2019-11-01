@@ -21,10 +21,11 @@ const createdBy = require('./hooks/createdBy');
 const updatedBy = require('./hooks/updatedBy');
 const {iff, disallow, isProvider, skipRemainingHooks} = require('feathers-hooks-common');
 const { ObjectID } = require('mongodb');
+const shardKey = require('./hooks/insertShardKey.js');
 
 module.exports = {
 	before: {
-		all: [paginateOption(), skipRemainingHooks(context => !context.params.provider)],
+		all: [shardKey(), paginateOption(), skipRemainingHooks(context => !context.params.provider)],
 		find: [
 			function(context){
 				const {query} = context.params;

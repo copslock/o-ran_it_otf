@@ -140,22 +140,25 @@ permissions = function (name = null) {
 			return context;
 		}
 
-		const params = Object.assign({}, context.params, { provider: null });
+		//see if the entity has already been pulled and stored, else get it
+		if(!context.params.entityData){
+			const params = Object.assign({}, context.params, { provider: null });
+			context.params.entityData = await service.get(context.id, params);
+		}
 
-		const result = await service.get(context.id, params);
-		throwUnlessCan(action, result);
+		throwUnlessCan(action, context.params.entityData);
 
 		if (action === 'get') {
-			context.result = pick(result, allowedFields);
+			context.result = pick(context.params.entityData, allowedFields);
 		}else{
 			if(context.data){
 				Object.keys(context.data).forEach(key => {
 					if(key == "$push"){
 						Object.keys(context.data['$push']).forEach(k => {
-							throwUnlessCan(action, result, k);
+							throwUnlessCan(action, context.params.entityData, k);
 						});
 					}else{
-						throwUnlessCan(action, result, key);
+						throwUnlessCan(action, context.params.entityData, key);
 					}
 				})
 			}

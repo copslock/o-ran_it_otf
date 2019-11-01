@@ -32,6 +32,7 @@ module.exports = function (app) {
 		ownerId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
 		mechanizedIds: [String]
 	}, {
+		shardKey: { parentGroupId: 1},
 		timestamps: true
 	});
 

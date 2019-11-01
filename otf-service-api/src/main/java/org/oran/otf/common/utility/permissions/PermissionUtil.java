@@ -146,7 +146,7 @@ public class PermissionUtil {
 
         for(Group group : groupsToCheck)
         {
-            if(group.getParentGroupId() != null) // if there is a parent
+            if(group != null && group.getParentGroupId() != null) // if there is a parent
             {
                 String parentId = group.getParentGroupId().toString();
                 Group parentGroup = groupMap.get(parentId);

@@ -149,7 +149,7 @@ class Service {
 		//         console.log(err);
 		//     }
 		// Set as deployed
-		delete params.query;
+		params.query = {};
 
 		//check to see if the process definition Key was set
 		// if (!data.testDefinition.processDefinitionKey) {

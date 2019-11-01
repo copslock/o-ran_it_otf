@@ -34,7 +34,7 @@ public class TestHead implements Serializable {
   @Id
   private ObjectId _id;
 
-  @Indexed(unique = true)
+  //@Indexed(unique = true)
   private String testHeadName;
 
   private String testHeadDescription;
