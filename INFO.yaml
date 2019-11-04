@@ -48,6 +48,16 @@ committers:
       id: 'rp5811'
       company: 'AT&T'
       timezone: 'America/New_York'
+    - name: 'Adam Ordway'
+      email: 'ao8347@att.com'
+      id: 'ao8347'
+      company: 'AT&T'
+      timezone: 'America/New_York'
+    - name: 'Justin Meilinger'
+      email: 'jx088j@att.com'
+      id: 'jx088j'
+      company: 'AT&T'
+      timezone: 'America/New_York'
     - <<: *it-otf_ptl
 tsc:
     approval: 'https://wiki.o-ran-sc.org/display/TOC#O-RANSCTechnicalOversightCommittee(TOC)-20190821'
