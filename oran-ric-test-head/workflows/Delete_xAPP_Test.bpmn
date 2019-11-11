@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0x9ttcz" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.0.1">
+  <bpmn:process id="Delete_xAPP_Test" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_0cebtfp" camunda:asyncBefore="true">
+      <bpmn:outgoing>SequenceFlow_03vt4gu</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="verify" name="Verify Inputs" scriptFormat="JavaScript">
+      <bpmn:incoming>SequenceFlow_03vt4gu</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1gceb7d</bpmn:outgoing>
+      <bpmn:script>var System = java.lang.System 
+
+var deleteVthId = 'delete'
+var testData = execution.getVariable("testData")
+var vthInput = execution.getVariable("vthInput")
+var validInput = false;
+var testResultMessage = "";
+
+try{
+
+  var appName = testData['appName'];
+
+  if(typeof appName  !== 'string' || appName.trim() === ''){
+    System.out.println("appName is not a string, or empty string")
+    throw Error("appName is not a string, or empty string")
+  }
+
+
+  validInput = true
+
+  vthInput[deleteVthId].name = appName
+}
+catch(err){
+  System.out.println(err)
+  validInput = false
+  testResultMessage = "Invalid input params. error: " + err;
+  execution.setVariable("testResult", "FAILED");
+}
+
+execution.setVariable("validInput", validInput)
+execution.setVariable("testResultMessage", testResultMessage)</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_04n8k6e" default="SequenceFlow_035k1kv">
+      <bpmn:incoming>SequenceFlow_1gceb7d</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1xykozf</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_035k1kv</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_03vt4gu" sourceRef="StartEvent_0cebtfp" targetRef="verify" />
+    <bpmn:sequenceFlow id="SequenceFlow_1gceb7d" sourceRef="verify" targetRef="ExclusiveGateway_04n8k6e" />
+    <bpmn:sequenceFlow id="SequenceFlow_1xykozf" name="To Delete" sourceRef="ExclusiveGateway_04n8k6e" targetRef="delete">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${validInput}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:scriptTask id="ScriptTask_1d0llw5" name="Mark Test Failure" scriptFormat="JavaScript">
+      <bpmn:incoming>SequenceFlow_035k1kv</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_11htm0z</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1ivi698</bpmn:outgoing>
+      <bpmn:script>execution.setVariable("testResult", "FAILED")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:scriptTask id="ScriptTask_0zeodmx" name="Mark Test Success" scriptFormat="JavaScript">
+      <bpmn:incoming>SequenceFlow_1fcorq2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1s62i1u</bpmn:outgoing>
+      <bpmn:script>execution.setVariable("testResult", "SUCCESS")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:endEvent id="EndEvent_0wf03rq">
+      <bpmn:incoming>SequenceFlow_1czqxne</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_1o1stwj" />
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1ivi698" sourceRef="ScriptTask_1d0llw5" targetRef="ServiceTask_0yfqtmz" />
+    <bpmn:sequenceFlow id="SequenceFlow_1s62i1u" sourceRef="ScriptTask_0zeodmx" targetRef="ServiceTask_0yfqtmz" />
+    <bpmn:sequenceFlow id="SequenceFlow_1czqxne" sourceRef="ServiceTask_0yfqtmz" targetRef="EndEvent_0wf03rq" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0df2lf1" default="SequenceFlow_11htm0z">
+      <bpmn:incoming>SequenceFlow_1hq011g</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1fcorq2</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_11htm0z</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1rdc2w4" sourceRef="delete" targetRef="checkDelete" />
+    <bpmn:sequenceFlow id="SequenceFlow_1fcorq2" name="Deleted" sourceRef="ExclusiveGateway_0df2lf1" targetRef="ScriptTask_0zeodmx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deleted}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_035k1kv" sourceRef="ExclusiveGateway_04n8k6e" targetRef="ScriptTask_1d0llw5" />
+    <bpmn:sequenceFlow id="SequenceFlow_11htm0z" sourceRef="ExclusiveGateway_0df2lf1" targetRef="ScriptTask_1d0llw5" />
+    <bpmn:scriptTask id="checkDelete" name="Verify Delete" scriptFormat="JavaScript">
+      <bpmn:incoming>SequenceFlow_1rdc2w4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1hq011g</bpmn:outgoing>
+      <bpmn:script>var System = java.lang.System 
+
+var deleteVthId = 'delete'
+var testData = execution.getVariable("testData")
+var vthInput = execution.getVariable("vthInput")
+var deleted = false;
+var testResultMessage = "RIC VTH reported that the xapp was not deleted."
+
+
+
+try {
+  //get output from delete call
+  var testExecution = execution.getVariable('otf-execution-testExecution');
+  var data = null;
+  testExecution.testHeadResults.forEach(function(item, index, array) {
+    if(item.bpmnVthTaskId == deleteVthId ){
+      data = item['testHeadResponse']['vthResponse']['resultData']['statusCode'];
+    }
+  })
+  
+  if(data === 204){
+    deleted = true
+    testResultMessage = "RIC VTH reported that the xapp was deleted."
+  }
+  
+}
+catch(err) {
+  deleted = false
+}
+
+execution.setVariable("deleted", deleted);
+execution.setVariable("testResultMessage", testResultMessage);</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1hq011g" sourceRef="checkDelete" targetRef="ExclusiveGateway_0df2lf1" />
+    <bpmn:task id="ServiceTask_0yfqtmz" name="UTIL:LogTestResult">
+      <bpmn:incoming>SequenceFlow_1ivi698</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1s62i1u</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1czqxne</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="delete" name="LVTH:RIC:Delete">
+      <bpmn:incoming>SequenceFlow_1xykozf</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1rdc2w4</bpmn:outgoing>
+    </bpmn:task>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Delete_xAPP_Test">
+      <bpmndi:BPMNShape id="StartEvent_0cebtfp_di" bpmnElement="StartEvent_0cebtfp">
+        <dc:Bounds x="156" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask_0rqy7r1_di" bpmnElement="verify">
+        <dc:Bounds x="234" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_04n8k6e_di" bpmnElement="ExclusiveGateway_04n8k6e" isMarkerVisible="true">
+        <dc:Bounds x="385" y="96" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_03vt4gu_di" bpmnElement="SequenceFlow_03vt4gu">
+        <di:waypoint x="192" y="121" />
+        <di:waypoint x="234" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1gceb7d_di" bpmnElement="SequenceFlow_1gceb7d">
+        <di:waypoint x="334" y="121" />
+        <di:waypoint x="385" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1xykozf_di" bpmnElement="SequenceFlow_1xykozf">
+        <di:waypoint x="435" y="121" />
+        <di:waypoint x="489" y="121" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="434" y="100" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ScriptTask_1d0llw5_di" bpmnElement="ScriptTask_1d0llw5">
+        <dc:Bounds x="749" y="336" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ScriptTask_0zeodmx_di" bpmnElement="ScriptTask_0zeodmx">
+        <dc:Bounds x="878" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0wf03rq_di" bpmnElement="EndEvent_0wf03rq">
+        <dc:Bounds x="1169" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ivi698_di" bpmnElement="SequenceFlow_1ivi698">
+        <di:waypoint x="849" y="376" />
+        <di:waypoint x="1065" y="376" />
+        <di:waypoint x="1065" y="161" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1s62i1u_di" bpmnElement="SequenceFlow_1s62i1u">
+        <di:waypoint x="978" y="121" />
+        <di:waypoint x="1015" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1czqxne_di" bpmnElement="SequenceFlow_1czqxne">
+        <di:waypoint x="1115" y="121" />
+        <di:waypoint x="1169" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0df2lf1_di" bpmnElement="ExclusiveGateway_0df2lf1" isMarkerVisible="true">
+        <dc:Bounds x="774" y="96" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1rdc2w4_di" bpmnElement="SequenceFlow_1rdc2w4">
+        <di:waypoint x="589" y="121" />
+        <di:waypoint x="629" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1fcorq2_di" bpmnElement="SequenceFlow_1fcorq2">
+        <di:waypoint x="824" y="121" />
+        <di:waypoint x="878" y="121" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="827" y="99" width="38" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_035k1kv_di" bpmnElement="SequenceFlow_035k1kv">
+        <di:waypoint x="410" y="146" />
+        <di:waypoint x="410" y="376" />
+        <di:waypoint x="749" y="376" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_11htm0z_di" bpmnElement="SequenceFlow_11htm0z">
+        <di:waypoint x="799" y="146" />
+        <di:waypoint x="799" y="336" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ScriptTask_0td2q01_di" bpmnElement="checkDelete">
+        <dc:Bounds x="629" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1hq011g_di" bpmnElement="SequenceFlow_1hq011g">
+        <di:waypoint x="729" y="121" />
+        <di:waypoint x="774" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Task_1tklwc0_di" bpmnElement="ServiceTask_0yfqtmz">
+        <dc:Bounds x="1015" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_026zsim_di" bpmnElement="delete">
+        <dc:Bounds x="489" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

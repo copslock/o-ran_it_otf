@@ -1,3 +1,18 @@
+#   Copyright (c) 2019 AT&T Intellectual Property.                             #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+################################################################################
+
 FROM openjdk:8
 
 ENV ENV=development
@@ -25,10 +40,16 @@ ENV PRIVATE_KEY=opt/cert/cert.key
 ENV PRIVATE_KEY_USERNAME=username
 ENV PRIVATE_KEY_PASSPHRASE=password
 
-COPY otf-camunda.jar app.jar
-
+RUN apt update
+RUN apt install maven -y
+COPY settings.xml settings.xml
+COPY src src
+COPY pom.xml pom.xml
+RUN mvn clean install -s settings.xml -DskipTests
+RUN rm /usr/share/maven/lib/*
+RUN ls
 RUN mkdir -p /otf/logs
-
-ADD src src
+RUN mv target/otf-camunda.jar app.jar
+RUN rm -r target
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

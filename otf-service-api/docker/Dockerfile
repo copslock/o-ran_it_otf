@@ -1,3 +1,18 @@
+#   Copyright (c) 2019 AT&T Intellectual Property.                             #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+################################################################################
+
 FROM openjdk:8
 
 ENV NAMESPACE=namespace
@@ -14,8 +29,8 @@ ENV OTF_MONGO_USERNAME=username
 ENV OTF_MONGO_PASSWORD=password
 ENV OTF_MONGO_REPLICASET=rs0
 ENV OTF_MONGO_DATABASE=otf
-ENV otf.camunda.host=https://localhost
-ENV otf.camunda.port=31313
+ENV otf.camunda.host=http://localhost
+ENV otf.camunda.port=8080
 ENV otf.camunda.executionUri=otf/tcu/execute-test/v1
 ENV otf.camunda.pollingUri=otf/tcu/process-instance-completion-check/v1
 ENV otf.camunda.deploymentUri=otf/tcu/deploy-test-strategy-zip/v1
@@ -34,10 +49,16 @@ ENV otf.api.poll-attempts=50
 ENV OTF_CERT_PATH=opt/cert/cert.p12
 ENV OTF_CERT_PASS=password
 
-COPY otf-service-api.jar app.jar
-
+RUN apt update
+RUN apt install maven -y
+COPY settings.xml settings.xml
+COPY src src
+COPY pom.xml pom.xml
+RUN mvn clean install -s settings.xml -DskipTests
+RUN rm /usr/share/maven/lib/*
+RUN ls
 RUN mkdir -p /otf/logs
-
-ADD src src
+RUN mv target/otf-service-api.jar app.jar
+RUN rm -r target
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

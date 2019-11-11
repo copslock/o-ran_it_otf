@@ -271,19 +271,19 @@ execution.setVariable("testResultMessage", testResultMessage);</bpmn:script>
       <bpmn:incoming>SequenceFlow_01cc25d</bpmn:incoming>
       <bpmn:terminateEventDefinition />
     </bpmn:endEvent>
-    <bpmn:serviceTask id="ready" name="VTH:RIC:Ready" camunda:delegateExpression="${callTestHeadDelegate}">
+    <bpmn:serviceTask id="ready" name="LVTH:RIC:Ready" camunda:delegateExpression="${callTestHeadDelegate}">
       <bpmn:incoming>SequenceFlow_1y69zdb</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0j9397y</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="first_list" name="VTH:RIC:List" camunda:delegateExpression="${callTestHeadDelegate}">
+    <bpmn:serviceTask id="first_list" name="LVTH:RIC:List" camunda:delegateExpression="${callTestHeadDelegate}">
       <bpmn:incoming>SequenceFlow_0zxo4fr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0s6ntyv</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="deploy" name="VTH:RIC:Deploy" camunda:delegateExpression="${callTestHeadDelegate}">
+    <bpmn:serviceTask id="deploy" name="LVTH:RIC:Deploy" camunda:delegateExpression="${callTestHeadDelegate}">
       <bpmn:incoming>SequenceFlow_08v4jva</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1oze54u</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="second_list" name="VTH:RIC:List" camunda:delegateExpression="${callTestHeadDelegate}">
+    <bpmn:serviceTask id="second_list" name="LVTH:RIC:List" camunda:delegateExpression="${callTestHeadDelegate}">
       <bpmn:incoming>SequenceFlow_07rma3l</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_07jnolr</bpmn:outgoing>
     </bpmn:serviceTask>

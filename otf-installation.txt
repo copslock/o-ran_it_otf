@@ -32,21 +32,18 @@ otf-robot-test-head
 
 
 otf-frontend
-   
+   docker build -t otf-frontend:0.0.1-SNAPSHOT .
+   docker run -d --network="host" otf-frontend:0.0.1-SNAPSHOT
 
 otf-service-api
   Modify src/main/resources/application.properties according to needs (disable aaf/ssl, set ports)
-  Add settings.xml from onap website and add profile to use maven default repository and add settings.xml to ~/.m2/ if missing
-  mvn clean install (add flag -DskipTests if it causes the build to fail)
-  navigate to target folder and run "docker build -t otf-service-api:0.0.1-SNAPSHOT ."
+  navigate to otf-service-api folder and run "docker build -t otf-service-api:0.0.1-SNAPSHOT -f docker/Dockerfile ." (maven will run from inside the container, command is inside the Dockerfile) 
   docker run -d --network="host" otf-service-api:0.0.1-SNAPSHOT
 
 
 otf-camunda
   Modify src/main/resources/application.yaml according to needs, and validate the yaml is correct format (disable aaf/ssl, set ports)
-  Add settings.xml from onap website and add profile to use maven default repository and add settings.xml to ~/.m2/ if missing
-  mvn clean install (add flag -DskipTests if it causes the build to fail)
-  navigate to target folder and run "docker build -t otf-camunda:0.0.1-SNAPSHOT ."
+  navigate to otf-camunda folder and run "docker build -t otf-camunda:0.0.1-SNAPSHOT -f docker/Dockerfile ." (maven will run from inside the container, command is inside the Dockerfile)
   docker run -d --network="host" otf-camunda:0.0.1-SNAPSHOT
 
 Database Notes

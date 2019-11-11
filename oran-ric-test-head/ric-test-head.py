@@ -17,6 +17,7 @@ import datetime
 import json
 import logging
 from logging import FileHandler
+import os
 
 import requests
 from flask import Flask, request, jsonify
@@ -82,7 +83,7 @@ def executeRicRequest():
 			responseData['vthResponse']['resultData']['statusCode'] = res.status_code
 			responseData['vthResponse']['resultData']['resultOutput'] = res.json()
 		elif action == 'deploy':
-			payload = {'name': requestData['name']}
+			payload = json.dumps({'name': requestData['name']})
 			res = requests.post(baseAddress+config['actions_path'][action], data=payload)
 			responseData['vthResponse']['resultData']['statusCode'] = res.status_code
 			responseData['vthResponse']['resultData']['resultOutput'] = res.json()
