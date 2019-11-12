@@ -8,7 +8,7 @@ Release-Notes
 =============
 
 
-This document provides the release notes for <RELEASE> of <COMPONENT>.
+This document provides the release notes for Amber Release of Open Test Framework (OTF).
 
 .. contents::
    :depth: 3
@@ -22,7 +22,7 @@ Version history
 | **Date**           | **Ver.**           | **Author**         | **Comment**        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
-| 20XX-XX-XX         | 0.1.0              |                    | First draft        |
+| 2019-11-12         | 0.1.0              | Rohan Patel (AT&T) | First draft        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
 |                    | 0.1.1              |                    |                    |
@@ -36,22 +36,20 @@ Version history
 Summary
 -------
 
-<SUMMARIZE THE RELEASE - THE CONTENT - AND OTHER IMPORTANT HIGH LEVEL PROPERTIES>
+This release will include the initial commit of the OTF platform code. Applications include otf-frontend, otf-service-api, otf-camunda, and several virtual test head microservices (ping, ssh, robot, ric). In addition setup documentation and installation guides are included to build docker containers and helm charts for deployment. 
 
 
 
 
 Release Data
 ------------
-<STATE RELEVANT RELEASE DATA/RECORDS>
 
-<EXAMPLE>:
 
 +--------------------------------------+--------------------------------------+
-| **Project**                          | E.g. project  		              |
+| **Project**                          | OTF                                  |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Repo/commit-ID**                   | E.g. genesis/adf634a0d4.....         |
+| **Repo/commit-ID**                   | it/otf                               |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 | **Release designation**              | E.g. Arno RC2                        |
@@ -60,7 +58,7 @@ Release Data
 | **Release date**                     | E.g. 2015-04-16                      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Purpose of the delivery**          | 	 		     	      |
+| **Purpose of the delivery**          |                                      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 
@@ -69,9 +67,7 @@ Release Data
 
 Feature Additions
 ^^^^^^^^^^^^^^^^^
-<STATE ADDED FEATURES BY REFERENCE TO JIRA>
 
-<EXAMPLE>:
 
 **JIRA BACK-LOG:**
 
@@ -79,12 +75,25 @@ Feature Additions
 | **JIRA REFERENCE**                   | **SLOGAN**                           |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| 		                       | 				      |
-|                                      | 				      |
+| INT-34                               | Contribute OTF seed code to Linux    |
+|                                      | Foundation                           |
++--------------------------------------+--------------------------------------+
+| INT-35                               | Deploy one operational OTF instance  |
+|                                      | in O-RAN SC lab                      |
++--------------------------------------+--------------------------------------+
+| INT-36                               | Develop one VTH                      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| 	                               |  				      |
-|                                      |  				      |
+| INT-37                               | Create one test strategy for         |
+|                                      | End-to-End Integration/Demo          |
++--------------------------------------+--------------------------------------+
+| INT-38                               | Create one test instance             |
+|                                      |                                      |
++--------------------------------------+--------------------------------------+
+| INT-39                               | Demonstrate OTF test execution       |
+|                                      |                                      |
++--------------------------------------+--------------------------------------+
+| INT-40                               | Documentation OTF and education      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 
@@ -112,16 +121,54 @@ Deliverables
 Software Deliverables
 +++++++++++++++++++++
 
-<STATE WHAT SOFTWARE DELIVERABLES THAT ARE RELATED TO THIS VERSION, AND WHERE THOSE CAN BE RETRIEVED>
+Code: https://gerrit.o-ran-sc.org/r/gitweb?p=it/otf.git;a=summary
+
+Repository contains several applications:
 
 
+oran-ric-test-head:     
+	- VTH that enables interaction with xAPP manager
+	- Functionality includes list, deploy, delete xApps
+        
+otf-aaf-credential-generator:      
+	- contains helm chart for AAF information
+        
+otf-camunda:
+	- Test Control Unit Engine       
+	- Application handles deployment and execution of OTF test strategies        
+        
+otf-cert-secret-builder:      
+	- contains helm chart for certificate and credential information
+        
+otf-frontend:        
+	- OTF Portal / GUI
+	- Application provides portal for OTF and allows users to deploy, execute, schedule, and view test executions
+        
+otf-ping-test=head:    
+	- VTH that capability to ping a server
+     
+otf-robot-test-head:    
+	- VTH that enables the execution of Robot tests
+    
+otf-service-api:
+	- Test Control Unit API
+	- Application exposes apis that allow clients to execute test instances, create test instances, and query execution status. 
+    
+otf-sst-test-head:    
+	- VTH that enables ssh capability to remote server
+    
+
+
+Instructions on how to build and run these applications can be found in the otf-installation.txt file located in the it/otf repository.
 
 Documentation Deliverables
 ++++++++++++++++++++++++++
 
-<STATE WHAT DOCUMENTATION DELIVERABLES THAT ARE RELATED TO THIS VERSION, AND WHERE THOSE CAN BE RETRIEVED>
+OTF Documentation can be found in the link below:
 
+Documentation: https://wiki.o-ran-sc.org/pages/viewpage.action?pageId=10715484
 
+The videos and documents located here contain information about how to use the OTF platform, create and execute tests, and troubleshoot workflows.
 
 
 Known Limitations, Issues and Workarounds
@@ -129,15 +176,11 @@ Known Limitations, Issues and Workarounds
 
 System Limitations
 ^^^^^^^^^^^^^^^^^^
-<STATE ALL RELEVANT SYSTEM LIMITATIONS, IF THERE IS ANY>
-
 
 
 Known Issues
 ^^^^^^^^^^^^
-<STATE ALL KNOWN ISSUES WITH JIRA REFERENCE>
 
-<EXAMPLE>:
 
 **JIRA TICKETS:**
 
@@ -157,15 +200,9 @@ Known Issues
 Workarounds
 ^^^^^^^^^^^
 
-<STATE ALL KNOWN WORKAROUNDS TO THE ISSUES STATED ABOVE, IF THERE IS ANY>
-
-
 
 
 References
 ----------
-<STATE RELEVANT REFERENCES FOR THIS RELEASE/VERSION>
-
-
 
 
