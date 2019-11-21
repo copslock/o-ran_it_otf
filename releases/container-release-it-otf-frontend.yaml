@@ -1,0 +1,10 @@
+---
+distribution_type: container
+container_release_tag: 0.0.4
+container_pull_registry: nexus3.o-ran-sc.org:10004
+container_push_registry: nexus3.o-ran-sc.org:10002
+project: it/otf
+ref: 0e30e8fe5bba71dc83539dc0fe52a9c237659d59
+containers:
+    - name: it-otf-frontend
+      version: 0.0.4
