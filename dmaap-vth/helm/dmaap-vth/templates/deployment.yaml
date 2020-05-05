@@ -1,0 +1,97 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName}}
+  namespace: {{.Values.namespace}}
+  labels:
+    app: {{ .Values.appName}}
+    version: {{.Values.version}}
+spec:
+  revisionHistoryLimit: 1
+  minReadySeconds: 10
+  strategy:
+  # indicate which strategy we want for rolling update
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  replicas: {{ .Values.replicas}}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName}}
+      version: {{.Values.version}}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName}}
+        version: {{.Values.version}}
+    spec:
+      serviceAccount: default
+      volumes:
+      - name: {{ .Values.appName}}-cert-volume
+        secret:
+          secretName: {{.Values.sharedCert}}
+          optional: true
+          items:
+          - key: PEM_CERT
+            path: otf.pem
+          - key: PEM_KEY
+            path: privateKey.pem
+      containers:
+      - name: {{ .Values.appName}}
+        image: {{ .Values.image}}
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 5000
+          nodePort: {{.Values.nodePort}}
+          protocol: TCP
+        env:
+        - name: NAMESPACE
+          value: {{.Values.namespace}}
+        - name: APP_NAME
+          value: {{ .Values.appName}}
+        - name: APP_VERSION
+          value: {{.Values.version}}
+        - name: HTTP
+          value: {{ .Values.HTTP}}
+        - name: HTTPS
+          value: {{ .Values.HTTPS}}
+        - name: BASE_URL
+          value: {{ .Values.BASE_URL}}
+        - name: USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: username
+        - name: PW
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.appName}}
+              key: password
+        volumeMounts:
+        - name: {{.Values.appName}}-cert-volume
+          mountPath: /opt/cert
+        livenessProbe:
+          httpGet:
+            path: {{.Values.health}}
+            port: http
+            scheme: HTTP
+            httpHeaders:
+              - name: X-Custom-Header
+                value: Alive
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: {{.Values.health}}
+            port: http
+            scheme: HTTP
+            httpHeaders:
+              - name: X-Custom-Header
+                value: Ready
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+          periodSeconds: 30
+      restartPolicy: Always

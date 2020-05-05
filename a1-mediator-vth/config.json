@@ -1,0 +1,11 @@
+{
+  "base_address": "127.0.0.1:3000",
+  "actions_path": {
+    "health_check": "/a1-p/healthcheck",
+    "list_policy": "/a1-p/policytypes",
+    "edit_policy": "/a1-p/policytypes/{policy_type_id}",
+    "list_policy_instance": "/a1-p/policytypes/{policy_type_id}/policies",
+    "edit_policy_instance": "/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}",
+    "get_policy_instance_status": "/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}/status"
+   }
+}

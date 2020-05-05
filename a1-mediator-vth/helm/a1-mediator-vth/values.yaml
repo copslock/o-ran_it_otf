@@ -1,0 +1,12 @@
+appName: a1-mediator-vth
+env: dev
+version: 0.0.1-SNAPSHOT
+image: a1-mediator-vth:0.0.1-SNAPSHOT
+namespace: org-oran-otf
+nodePort: 32324
+replicas: 1
+health : /otf/vth/oran/a1/v1/health
+sharedCert: otf-cert-secret-builder
+pvc:
+  dev: org-oran-otf-dev-logs-pv
+  prod: org-oran-otf-prod-logs-pv

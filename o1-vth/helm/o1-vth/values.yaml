@@ -1,0 +1,18 @@
+appName: o1-vth
+env: dev
+version: 0.0.1-SNAPSHOT
+image: o1-vth:0.0.1-SNAPSHOT
+namespace: org-oran-otf
+nodePort: 32130
+replicas: 1
+health : /otf/vth/oran/smo/v1/health
+sharedCert: otf-cert-secret-builder
+pvc:
+  dev: org-oran-otf-dev-logs-pv
+  prod: org-oran-otf-prod-logs-pv
+HTTP: "[Your HTTP PROXY HERE]"
+HTTPS: "[Your HTTPS PROXY HERE]"
+BASE_URL: http://sdn-r-dev.open5g-test.com
+credentials:
+  username: "!"
+  password: "!"
