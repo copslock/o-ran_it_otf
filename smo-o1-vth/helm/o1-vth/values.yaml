@@ -1,7 +1,7 @@
-appName: o1-vth
+appName: smo-o1-vth
 env: dev
 version: 0.0.1-SNAPSHOT
-image: o1-vth:0.0.1-SNAPSHOT
+image: smo-o1-vth:0.0.1-SNAPSHOT
 namespace: org-oran-otf
 nodePort: 32130
 replicas: 1

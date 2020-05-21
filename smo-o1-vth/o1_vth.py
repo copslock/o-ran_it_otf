@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and        #
 #   limitations under the License.                                             #
 ################################################################################
-# File name: o1-vth.py                                                        #
+# File name: smo-o1-vth.py                                                        #
 # Description: Mainly used to get alarm list                                   #
 # Date created: 04/14/2020                                                     #
 # Python Version: 3.7                                                          #
@@ -136,7 +136,7 @@ def getHealth():
     return 'UP'
 
 if __name__ == '__main__':
-    logHandler = FileHandler('o1-vth.log', mode='a')
+    logHandler = FileHandler('smo-o1-vth.log', mode='a')
     logHandler.setLevel(logging.INFO)
     app.logger.setLevel(logging.INFO)
     app.logger.addHandler(logHandler)

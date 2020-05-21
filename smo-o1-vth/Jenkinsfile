@@ -65,7 +65,7 @@ node("docker"){
 
 				withCredentials([usernamePassword(credentialsId: MECHID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 
-                    dir("o1-vth"){
+                    dir("docker"){
                         echo "Artifact: " + IMAGE_NAME
 
                         sh """
@@ -100,7 +100,7 @@ node("docker"){
 
 			withCredentials([file(credentialsId: KUBE_CONFIG, variable: 'KUBECONFIG')]) {
 
-				dir('o1-vth/helm'){
+				dir('helm'){
 			    	//check if charts are valid, and then perform dry run, if successful then upgrade/install charts
 
   					if (PHASES.contains("UNDEPLOY") ) {
