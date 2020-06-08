@@ -80,7 +80,7 @@ def executeRicRequest():
         action = requestData['action'].lower()
         _check_incoming_request(requestData)
 
-        os.environ['NO_PROXY'] = '127.0.0.1'  # TODO testing purpose w/ mock server. Needs to remove on final version
+        os.environ['NO_PROXY'] = '*'
         with open('config.json') as configFile:
             config = json.load(configFile)
 
@@ -153,7 +153,7 @@ def _send_edit_request(request_data, config):
         return requests.get(path)
     if request_type == 'put':
         payload = request_data['payload']
-        return requests.put(path, payload)
+        return requests.put(path, json=payload)
     if request_type == 'delete':
         return requests.delete(path)
 

@@ -122,13 +122,13 @@ def _send_request(url, config, is_subscribe_request=False, payload=None):
     if is_subscribe_request:
         return requests.get(url,
                             auth=(username, password) if auth_enabled else None,
-                            proxies=req_proxies if proxy_enabled else None)
+                            proxies=req_proxies)
     # for publish request
     req_headers = {'Content-type': 'application/json'}
     return requests.post(url,
                          json=payload,
                          auth=(username, password) if auth_enabled else None,
-                         proxies=req_proxies if proxy_enabled else None,
+                         proxies=req_proxies,
                          headers=req_headers)
 
 @app.route("/otf/vth/oran/dmaap/v1/health", methods=['GET'])
