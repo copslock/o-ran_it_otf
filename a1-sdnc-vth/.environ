@@ -1,0 +1,9 @@
+#if using dotenv change file name to .env and set env variables below
+USER=String
+PW=String
+AUTH=Boolean
+PROXY=Boolean
+HTTP=String
+HTTPS=String
+API_URL=String
+API_PORT=Int

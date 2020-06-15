@@ -1,0 +1,72 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.mongodb.appName }}
+  namespace: {{.Values.global.mongodb.namespace }}
+  labels:
+    app: {{ .Values.global.mongodb.appName }}
+    version: {{.Values.global.mongodb.version }}
+spec:
+  revisionHistoryLimit: 1   # keep one replica set to allow rollback
+  minReadySeconds: 10
+  strategy:
+  # indicate which strategy we want for rolling update
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  replicas: {{ .Values.global.mongodb.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.global.mongodb.appName }}
+      version: {{.Values.global.mongodb.version }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.mongodb.appName }}
+        version: {{.Values.global.mongodb.version }}
+    spec:
+      serviceAccount: default
+      containers:
+      - name: {{ .Values.global.mongodb.appName }}
+        image: {{ .Values.global.mongodb.image.registry }}/{{ .Values.global.mongodb.image.repository }}
+        imagePullPolicy: Always               
+        env:
+        - name: MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name : {{ .Values.global.mongodb.appName }}
+              key: mongo_password
+        - name: MONGODB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name : {{ .Values.global.mongodb.appName }}
+              key: mongo_root_password
+        - name: MONGODB_USERNAME
+          value: {{ .Values.global.mongodb.mongodbUsername | quote }}
+        - name: MONGODB_DATABASE
+          value: {{ .Values.global.mongodb.mongodbDatabase | quote }}
+        ports:
+        - name: mongodb
+          containerPort: 27017
+          hostPort: 27017
+        resources:
+          limits: 
+            memory: {{ .Values.global.mongodb.resources.limits.memory }}
+            cpu: {{ .Values.global.mongodb.resources.limits.cpu }}
+          requests:
+            memory: {{ .Values.global.mongodb.resources.requests.memory }}
+            cpu: {{ .Values.global.mongodb.resources.requests.cpu }}
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/bash", "-c", "cd data/scripts;./init_db.sh"]
+        volumeMounts:
+           - name: custom-init-scripts
+             mountPath: /data/scripts
+      volumes:
+        - name: custom-init-scripts
+          configMap:
+            name: {{  .Values.global.mongodb.appName }}-init-scripts
+            defaultMode: 0755
+      restartPolicy: Always

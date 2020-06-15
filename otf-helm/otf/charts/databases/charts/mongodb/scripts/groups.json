@@ -1,0 +1,46 @@
+{
+    "_id" : ObjectId("5bdb2bdbd6b0d1f97953fbd7"),
+    "ownerId" : ObjectId("5b9bf50008a8133dc84c1496"),
+    "groupName" : "otf-public-dev",
+    "groupDescription" : "The OTF public group used in the dev environment.",
+    "parentGroupId" : null,
+    "members" : [ 
+        {
+            "roles" : [ 
+                "admin"
+            ],
+            "userId" : ObjectId("5b9bf50008a8133dc84c1496")
+        }
+    ],
+    "roles" : [ 
+        {
+            "permissions" : [ 
+                "read", 
+                "write", 
+                "execute", 
+                "delete", 
+                "management"
+            ],
+            "roleName" : "admin"
+        }, 
+        {
+            "permissions" : [ 
+                "read"
+            ],
+            "roleName" : "user"
+        }, 
+        {
+            "permissions" : [ 
+                "read", 
+                "write", 
+                "execute", 
+                "delete"
+            ],
+            "roleName" : "developer"
+        }
+    ],
+    "mechanizedIds" : [ 
+    ],
+    "_class" : "com.att.otf.api.domain.Group",
+    "updatedAt" : ISODate("2020-05-05T21:58:56.381Z")
+}

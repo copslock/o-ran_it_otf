@@ -1,0 +1,28 @@
+{
+    "_id" : ObjectId("5b9bf50008a8133dc84c1496"),
+    "permissions" : [ 
+        "admin"
+    ],
+    "firstName" : "Admin",
+    "lastName" : "Admin",
+    "email" : "admin@test.com",
+    "password" : "$2a$13$TZQCQrG6LuNdHgpEXB9YgOfaYZC7xG2E3ICE9lO/0Y9rh5gPdbQWu",
+    "groups" : [ 
+        {
+            "permissions" : [ 
+                "admin"
+            ],
+            "groupId" : ObjectId("5bdb2bdbd6b0d1f97953fbd7")
+        }
+    ],
+    "createdAt" : ISODate("2020-05-05T12:13:05.176Z"),
+    "updatedAt" : ISODate("2020-05-05T20:40:16.591Z"),
+    "_class" : "com.att.otf.api.domain.User",
+    "favorites" : {
+        "testDefinitions" : [ 
+        ]
+    },
+    "enabled" : true,
+    "defaultGroup" : ObjectId("5bdb2bdbd6b0d1f97953fbd7"),
+    "defaultGroupEnabled" : true
+}

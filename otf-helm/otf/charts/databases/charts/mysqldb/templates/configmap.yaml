@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name : {{ .Values.global.mysqldb.appName }}-init-scripts
+
+data:
+  {{- $files := .Files }}
+  {{- range $key, $value := .Files }}
+  {{- if hasPrefix "scripts/" $key }} {{/* only when in scripts/ */}}
+  {{ $key | trimPrefix "scripts/" }}: {{ $files.Get $key | quote }} {{/* adapt $key as desired */}}
+  {{- end }}
+  {{- end }}

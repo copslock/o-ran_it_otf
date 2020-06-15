@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: {{ .Values.global.mysqldb.appName }}
+  namespace: {{.Values.global.mysqldb.namespace }}
+  labels:
+    app: {{ .Values.global.mysqldb.appName }}
+    version: {{.Values.global.mysqldb.version }}
+    
+spec:
+  strategy:
+   # indicate which strategy we want for rolling update
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  replicas: {{ .Values.global.mysqldb.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.global.mysqldb.appName }}
+      version: {{.Values.global.mysqldb.version }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.mysqldb.appName }}
+        version: {{.Values.global.mysqldb.version }}
+    spec:
+      serviceAccountName: default
+      containers:
+      - name: {{ .Values.global.mysqldb.appName }}
+        image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+        image: {{ .Values.global.mysqldb.image.image }}:{{ .Values.global.mysqldb.image.tag }}
+        imagePullPolicy: Always
+        resources:
+          limits: 
+            memory: {{ .Values.global.mysqldb.resources.limits.memory }}
+            cpu: {{ .Values.global.mysqldb.resources.limits.cpu }}
+          requests:
+            memory: {{ .Values.global.mysqldb.resources.requests.memory }}
+            cpu: {{ .Values.global.mysqldb.resources.requests.cpu }}
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.mysqldb.appName }}
+              key: mysql_root_password
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.mysqldb.appName }}
+              key: mysql_password
+        - name: MYSQL_USER
+          value: {{ .Values.global.mysqldb.mysqlUser | quote }}
+        - name: MYSQL_DATABASE
+          value: {{ .Values.global.mysqldb.mysqlDatabase | quote }}
+        - name: TZ
+          value: {{ .Values.timezone }}
+        ports:
+        - name: {{ .Values.global.mysqldb.appName }}
+          containerPort: 3306
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/bash", "-c", "cd data/scripts;./init_db.sh"]
+        volumeMounts:
+           - name: custom-init-scripts
+             mountPath: /data/scripts
+      volumes:
+        - name: custom-init-scripts
+          configMap:
+            name: {{  .Values.global.mysqldb.appName }}-init-scripts
+            defaultMode: 0755
+      restartPolicy: Always
+ 

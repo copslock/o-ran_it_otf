@@ -1,0 +1,65 @@
+# Default values for otf.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+shared: &shared
+  httpProxy: http://proxy.conexus.svc.local:3128
+  httpsProxy: http://proxy.conexus.svc.local:3128
+  namespace: dev
+  proxyUrl: http://proxy.conexus.svc.local
+  proxyPort: 3128
+  nodeApi:
+    url: http://az-otf.dev.att.com
+    host: az-otf.dev.att.com
+
+global:
+        
+  mongodb: &mongodb
+    <<: *shared
+    appName: mongodb
+    version: Camille.2.1
+    replicas : 1
+    mongodbRootPassword: otf.123
+    mongodbUsername: otfuser
+    mongodbPassword: Today.123
+    mongodbDatabase: otf
+    port: 27017
+    targetPort: 27017
+    image:
+      registry: docker.io
+      repository: bitnami/mongodb
+      tag: 4.2.6-debian-10-r18
+      pullPolicy: IfNotPresent
+      debug: false
+    resources:
+      limits:
+        memory: "500Mi"
+        cpu: "1"
+      requests:
+        memory: "256Mi"
+        cpu: "1"
+        
+  mysqldb: &mysqldb
+    <<: *shared
+    appName: mysqldb
+    version: Camille.2.1
+    replicas : 1
+    mysqlRootPassword: otf.123
+    mysqlUser: otfuser
+    mysqlPassword: Today.123
+    mysqlDatabase: otf_camunda
+    port: 3306
+    targetPort: 8306
+    image:
+      registry: docker.io
+      image: mysql
+      tag: 5.7.26
+      pullPolicy: IfNotPresent
+      debug: false
+    resources:
+      limits:
+        memory: "500Mi"
+        cpu: "1"
+      requests:
+        memory: "256Mi"
+        cpu: "1"

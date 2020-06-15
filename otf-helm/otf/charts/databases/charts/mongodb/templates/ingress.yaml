@@ -1,0 +1,30 @@
+# Need Updates to configure the connectivity when we deploy other microservices to connect to mongodb
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Values.global.mongodb.appName }}
+  namespace: {{.Values.global.mongodb.namespace }}
+  labels:
+    app: {{ .Values.global.mongodb.appName }}
+    version: {{.Values.global.mongodb.version }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+      grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.global.mongodb.nodeApi.host }}
+    secretName: {{.Values.global.mongodb.certName }}
+  rules:
+  - host: {{ .Values.global.mongodb.nodeApi.host }}
+    http:
+      paths:
+      - path: /mongodb/(.*)
+        backend:
+          serviceName: {{ .Values.global.mongodb.appName }}
+          servicePort: {{ .Values.global.mongodb.port }}

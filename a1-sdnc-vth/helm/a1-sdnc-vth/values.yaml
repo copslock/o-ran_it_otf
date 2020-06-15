@@ -1,0 +1,23 @@
+appName: a1-sdnc-vth
+env: dev
+version: 0.0.1-SNAPSHOT
+image: dockercentral.it.att.com:5100/com.att.ecomp.otf.dev/a1-sdnc-vth:0.0.1-SNAPSHOT
+namespace: com-att-ecomp-otf-dev #org-oran-otf
+nodePort: 32331
+replicas: 1
+health : /otf/vth/oran/a1/v1/health
+sharedCert: otf-cert-secret-builder
+pvc:
+  dev: org-oran-otf-dev-logs-pv
+  prod: org-oran-otf-prod-logs-pv
+auth:
+  enabled: true
+  user: user
+  pw: pw
+proxy:
+  enabled: false
+  http: 
+  https: 
+api:
+  base_url: http://njcdtl08rg9907.itservices.sbc.com
+  port: 3000

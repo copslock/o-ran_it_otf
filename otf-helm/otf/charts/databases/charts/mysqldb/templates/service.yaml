@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.mysqldb.appName }}
+  namespace: {{ .Values.global.mysqldb.namespace }}
+  labels:
+    app: {{ .Values.global.mysqldb.appName }}
+    version: {{ .Values.global.mysqldb.version }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: {{ .Values.global.mysqldb.port }}
+    protocol: TCP
+    targetPort: {{ .Values.global.mysqldb.targetPort }}
+  selector:
+    app: {{ .Values.global.mysqldb.appName }}
+    version: {{ .Values.global.mysqldb.version }}
