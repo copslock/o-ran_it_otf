@@ -25,7 +25,7 @@ Version history
 | 2019-11-12         | 0.1.0              | Rohan Patel (AT&T) | First draft        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
-|                    | 0.1.1              |                    |                    |
+| 2020-06-16         | 0.1.2              | Jackie Chen (AT&T) | new VTH development|
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
 |                    | 1.0                |                    |                    |
@@ -36,8 +36,15 @@ Version history
 Summary
 -------
 
-This release will include the initial commit of the OTF platform code. Applications include otf-frontend, otf-service-api, otf-camunda, and several virtual test head microservices (ping, ssh, robot, ric). In addition setup documentation and installation guides are included to build docker containers and helm charts for deployment. 
+This release(0.1.2) will include new VTHs that were developed for oran community.The following are VTHs were developed:
 
+    - dmaap
+    - A1-mediator
+    - smo-o1
+    - SDNC
+    - A1-policy-manager
+
+Most of the vth were built according to health-check use cases(Workflow #2,#3,#4) via: https://wiki.o-ran-sc.org/display/RSAC/Health-Check+Use+Case
 
 
 
@@ -52,13 +59,13 @@ Release Data
 | **Repo/commit-ID**                   | it/otf                               |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Release designation**              | E.g. Arno RC2                        |
+| **Release designation**              | Bronze                               |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Release date**                     | E.g. 2015-04-16                      |
+| **Release date**                     | 2020-06-16                           |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Purpose of the delivery**          |                                      |
+| **Purpose of the delivery**          | update repo with VTHs                |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 
@@ -75,25 +82,7 @@ Feature Additions
 | **JIRA REFERENCE**                   | **SLOGAN**                           |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| INT-34                               | Contribute OTF seed code to Linux    |
-|                                      | Foundation                           |
-+--------------------------------------+--------------------------------------+
-| INT-35                               | Deploy one operational OTF instance  |
-|                                      | in O-RAN SC lab                      |
-+--------------------------------------+--------------------------------------+
-| INT-36                               | Develop one VTH                      |
 |                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| INT-37                               | Create one test strategy for         |
-|                                      | End-to-End Integration/Demo          |
-+--------------------------------------+--------------------------------------+
-| INT-38                               | Create one test instance             |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| INT-39                               | Demonstrate OTF test execution       |
-|                                      |                                      |
-+--------------------------------------+--------------------------------------+
-| INT-40                               | Documentation OTF and education      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 
@@ -156,8 +145,33 @@ otf-service-api:
     
 otf-sst-test-head:    
 	- VTH that enables ssh capability to remote server
-    
 
+dmaap-vth:
+    - VTH used to subscribe and publish topics/message via dmaap api
+
+a1-mediator-vth:
+    - VTH used to communicate with A1-mediator
+    - Built according to: https://gerrit.o-ran-sc.org/r/gitweb?p=ric-plt/a1.git;a=blob;f=a1/openapi.yaml
+    - Functionality includes:
+        - health-check on A1
+        - list registered policy types
+        - GET,DELETE,PUT policy types
+        - list policy instance
+        - GET,DELETE,PUT policy instance
+        - Retrieve policy instance status
+
+smo-o1-vth:
+    - Performs health checks to verify that O1 interface is alive by getting alarm list
+
+a1-policy-manager-vth:
+    - Used to communicate with A1 policy management service api
+    - Built according to: https://docs.o-ran-sc.org/projects/o-ran-sc-nonrtric/en/latest/policy-agent-api.html#policy-agent-api
+    - Has all functionality that is available in the above link. The vth will require the action and method necessary information e.g. query values and json data and forward the request to the service
+
+a1-sdnc-vth:
+    - Used to communicate with SDNC A1 Controller api
+    - built according to: https://docs.o-ran-sc.org/projects/o-ran-sc-nonrtric/en/latest/sdnc-a1-controller-api.html
+    - Has all functionality that is available in the above link. The vth will require the action and method necessary information e.g. query values and json data and forward the request to the service
 
 Instructions on how to build and run these applications can be found in the otf-installation.txt file located in the it/otf repository.
 

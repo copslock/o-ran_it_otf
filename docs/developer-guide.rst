@@ -26,11 +26,12 @@ Developer-Guide
 
 Deployment
 ----------
+The following are typical steps used to deploy and run different components of OTF.
 
 OTF Frontend
 ^^^^^^^^^^^^
 1) docker build -t otf-frontend:0.0.1-SNAPSHOT .
-2) docker run -d --network="host" otf-frontend:0.0.1-SNAPSHOT
+2) docker run -e OTF_URL='http://localhost:8082/ -d --network="host" otf-frontend:0.0.1-SNAPSHOT
 
 OTF SERVICE API
 ^^^^^^^^^^^^^^^^
@@ -78,7 +79,7 @@ Unable to log in to OTF UI as the first user on the platform
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 When registering as a new user, you will eventually need an admin to "enable" you. If you are the first User,
 there will be no admin and you will be unable to log in even after you register. In order to fix this, you will have to
-manually go into the mongo database and alter certain attributes for this new user.
+manually go into the mongo database and alter certain enabled and permission attribute for this new user.
 
 .. image:: images/mongo-user.PNG
 
