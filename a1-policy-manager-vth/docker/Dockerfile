@@ -9,7 +9,7 @@ ADD run.py run.py
 
 RUN mkdir -p /otf/logs
 
-RUN python -m pip install --proxy http://one.proxy.att.com:8080 -r pip-requirements.txt
+RUN python -m pip install -r pip-requirements.txt
 
 ENV USER=default_user
 ENV PW=default_pass
