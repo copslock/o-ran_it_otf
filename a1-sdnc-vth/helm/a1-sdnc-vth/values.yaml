@@ -1,8 +1,8 @@
 appName: a1-sdnc-vth
 env: dev
 version: 0.0.1-SNAPSHOT
-image: dockercentral.it.att.com:5100/com.att.ecomp.otf.dev/a1-sdnc-vth:0.0.1-SNAPSHOT
-namespace: com-att-ecomp-otf-dev #org-oran-otf
+image: a1-sdnc-vth:0.0.1-SNAPSHOT
+namespace: org-oran-otf
 nodePort: 32331
 replicas: 1
 health : /otf/vth/oran/a1/v1/health

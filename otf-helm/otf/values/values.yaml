@@ -3,28 +3,28 @@
 # Declare variables to be passed into your templates.
 
 shared: &shared
-  httpProxy: http://proxy.conexus.svc.local:3128
-  httpsProxy: http://proxy.conexus.svc.local:3128
+  httpProxy: "!"
+  httpsProxy: "!"
   namespace: dev
-  proxyUrl: http://proxy.conexus.svc.local
-  proxyPort: 3128
+  proxyUrl: "!"
+  proxyPort: "!"
   nodeApi:
-    url: http://az-otf.dev.att.com
-    host: az-otf.dev.att.com
+    url: "!"
+    host: "!"
 
 global:
-        
+
   mongodb: &mongodb
     <<: *shared
     appName: mongodb
-    version: Camille.2.1
+    version: 0.0.1
     replicas : 1
-    mongodbRootPassword: otf.123
-    mongodbUsername: otfuser
-    mongodbPassword: Today.123
+    mongodbRootPassword: "!"
+    mongodbUsername: "!"
+    mongodbPassword: "!"
     mongodbDatabase: otf
-    port: 27017
-    targetPort: 27017
+    port: "!"
+    targetPort: "!"
     image:
       registry: docker.io
       repository: bitnami/mongodb
@@ -38,15 +38,15 @@ global:
       requests:
         memory: "256Mi"
         cpu: "1"
-        
+
   mysqldb: &mysqldb
     <<: *shared
     appName: mysqldb
-    version: Camille.2.1
+    version: 0.0.1
     replicas : 1
-    mysqlRootPassword: otf.123
-    mysqlUser: otfuser
-    mysqlPassword: Today.123
+    mysqlRootPassword: "!"
+    mysqlUser: "!"
+    mysqlPassword: "!"
     mysqlDatabase: otf_camunda
     port: 3306
     targetPort: 8306

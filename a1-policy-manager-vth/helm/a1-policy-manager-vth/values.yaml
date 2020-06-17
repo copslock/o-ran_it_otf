@@ -1,8 +1,8 @@
 appName: a1-policy-manager-vth
 env: dev
 version: 0.0.1-SNAPSHOT
-image: dockercentral.it.att.com:5100/com.att.ecomp.otf.dev/a1-policy-manager-vth:0.0.1-SNAPSHOT
-namespace: com-att-ecomp-otf-dev #org-oran-otf
+image: a1-policy-manager-vth:0.0.1-SNAPSHOT
+namespace: org-oran-otf
 nodePort: 32330
 replicas: 1
 health : /otf/vth/oran/a1/v1/health
@@ -12,8 +12,8 @@ pvc:
   prod: org-oran-otf-prod-logs-pv
 auth:
   enabled: true
-  user: user
-  pw: pw
+  user: "!"
+  pw: "!"
 proxy:
   enabled: false
   http: 
